@@ -1,0 +1,16 @@
+//
+// Created by facun on 2/6/2026.
+//
+
+#ifndef PALABORATORIO2026_EMPLEADOCONTROLLER_H
+#define PALABORATORIO2026_EMPLEADOCONTROLLER_H
+
+
+
+class EmpleadoController {
+
+};
+
+
+
+#endif //PALABORATORIO2026_EMPLEADOCONTROLLER_H
