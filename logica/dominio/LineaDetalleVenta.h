@@ -7,6 +7,7 @@ class LineaDetalleVenta{
         int cantidad;
         float precioUnitario;
     public:
+        int getCantidad();
 
 };
 #endif
