@@ -1,0 +1,16 @@
+//
+// Created by facun on 2/6/2026.
+//
+
+#ifndef PALABORATORIO2026_MENUEMPLEADO_H
+#define PALABORATORIO2026_MENUEMPLEADO_H
+
+
+
+class MenuEmpleado {
+
+};
+
+
+
+#endif //PALABORATORIO2026_MENUEMPLEADO_H
