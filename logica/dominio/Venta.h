@@ -7,11 +7,18 @@
 
 using namespace std;
 class Venta{
-    public:
+    private:
         DTFecha fecha;
         DTHora hora;
         vector<LineaDetalleVenta*> detalleVenta;
-    private:
+    public:
+    Venta(DTFecha fecha, DTHora hora);
+
+    DTFecha getFecha();
+    DTHora getHora();
+
+    void setFecha(DTFecha fecha);
+    void setHora(DTHora hora);
 
 };
 #endif

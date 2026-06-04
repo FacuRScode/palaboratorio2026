@@ -12,12 +12,12 @@ class Proveedor{
     public:
     Proveedor(string rut, string empresa, string telefono, string contactoComercial);
 
-    string getNombre();
+    string getRut();
     string getEmpresa();
     string getTelefono();
-    string contactoComercial();
+    string getContactoComercial();
 
-    void setNombre(string nombre);
+    void setRut(string rut);
     void setEmpresa(string empresa);
     void setTelefono(string telefono);
     void setContactoComercial(string contactoComercial);

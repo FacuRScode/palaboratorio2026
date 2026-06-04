@@ -12,7 +12,7 @@ class ProveedorProducto{
     ProveedorProducto(int precioCompraPactado, int tiempoEntregaEstimadoEnDias);
 
     int getPrecioCompraPactado();
-    int getTiempoEntegaEstimadoEnDias();
+    int getTiempoEntregaEstimadoEnDias();
 
     void setPrecioCompraPactado(int precioCompraPactado);
     void setTiempoEntregaEstimadoEnDias(int tiempoEntregaEstimadoEnDias);

@@ -7,7 +7,12 @@ class LineaDetalleVenta{
         int cantidad;
         float precioUnitario;
     public:
-        int getCantidad();
+        LineaDetalleVenta(int cantidad, float precioUnitario);
 
+        int getCantidad();
+        float getPrecioUnitario();
+
+        void setCantidad(int cantidad);
+        void setPrecioUnitario(float precioUnitario);
 };
 #endif

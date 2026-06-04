@@ -24,7 +24,7 @@ class Producto{
     string getDescripcion();
     float getPrecioVentaActual();
     int getStock();
-    float puntajePromedio();
+    float getPuntajePromedio();
 
     void setCodigo(int codigo);
     void setNombre(string nombre);
