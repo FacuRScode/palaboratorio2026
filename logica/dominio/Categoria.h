@@ -12,7 +12,7 @@ class Categoria{
         vector<Producto*> productos;
     public:
         Categoria(string nombre, string descripcion);
-
+//el michael estuvo aca
         string getNombre();
         string getDescripcion();
 
