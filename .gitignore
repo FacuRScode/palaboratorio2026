@@ -1,0 +1,59 @@
+# .gitignore para proyecto C++/CMake desarrollado con CLion (Windows/Linux/Mac)
+# Ignora artefactos de compilación, IDE y archivos temporales
+
+# Directorios de build comunes
+/build/
+/cmake-build-debug/
+
+# Archivos generados por CMake
+/CMakeFiles/
+/CMakeCache.txt
+/cmake_install.cmake
+/compile_commands.json
+/build.ninja
+/Makefile
+
+# Ejecutables y objetos
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.lo
+
+# Librerías y símbolos
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.pdb
+
+# IDEs y editores
+.idea/
+*.iml
+.vscode/
+
+# Logs, temporales y back-ups
+*.log
+*.tmp
+*.temp
+*.orig
+.DS_Store
+Thumbs.db
+
+# Paquetes / archivados
+*.zip
+*.tar.gz
+*.7z
+
+# Otros
+*.user
+*.userosscache
+
+# Cobertura / reportes
+coverage/
+
+# Evitar subir binarios generados por CLion / CMake
+/cmake-build-debug/*.exe
+
