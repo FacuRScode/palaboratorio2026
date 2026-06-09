@@ -32,5 +32,12 @@ class Producto{
     void setPrecioVentaActual(float precioVentaActual);
     void setStock(int stock);
     void setPuntajePromedio(float puntajePromedio);
+
+    // Calificaciones y detalle de ventas
+    void addCalificacion(Calificacion* cal);
+    const vector<Calificacion*>& getCalificaciones() const;
+
+    void addLineaVenta(LineaDetalleVenta* linea);
+    const vector<LineaDetalleVenta*>& getDetalleVenta() const;
 };
 #endif

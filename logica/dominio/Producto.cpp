@@ -45,3 +45,19 @@ void Producto::setStock(int stock) {
 void Producto::setPuntajePromedio(float puntajePromedio) {
     this->puntajePromedio = puntajePromedio;
 }
+
+void Producto::addCalificacion(Calificacion* cal) {
+    if (cal != nullptr) this->calificaciones.push_back(cal);
+}
+
+const vector<Calificacion*>& Producto::getCalificaciones() const {
+    return this->calificaciones;
+}
+
+void Producto::addLineaVenta(LineaDetalleVenta* linea) {
+    if (linea != nullptr) this->detalleVenta.push_back(linea);
+}
+
+const vector<LineaDetalleVenta*>& Producto::getDetalleVenta() const {
+    return this->detalleVenta;
+}

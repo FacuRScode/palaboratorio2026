@@ -20,5 +20,12 @@ class Venta{
     void setFecha(DTFecha fecha);
     void setHora(DTHora hora);
 
+    // Detalle de la venta
+    void addLinea(LineaDetalleVenta* linea);
+    const vector<LineaDetalleVenta*>& getDetalle() const;
+    float calcularTotal() const;
+
+    ~Venta();
+
 };
 #endif

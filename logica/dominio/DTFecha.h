@@ -1,4 +1,4 @@
-#ifndef DETFECHA_H
+#ifndef DTFECHA_H
 #define DTFECHA_H
 
 using namespace std;

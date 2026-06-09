@@ -44,4 +44,12 @@ void Cliente::setCorreo(string correo) {
 	this->correo = correo;
 }
 
+void Cliente::addVenta(Venta* venta) {
+	if (venta != nullptr) this->ventas.push_back(venta);
+}
+
+const vector<Venta*>& Cliente::getVentas() const {
+	return this->ventas;
+}
+
 
