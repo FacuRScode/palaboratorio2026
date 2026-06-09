@@ -25,5 +25,9 @@ class Cliente{
         void setApellido(string apellido);
         void setDireccion(string direccion);
         void setCorreo(string correo);
+
+        // Ventas y calificaciones
+        void addVenta(Venta* venta);
+        const vector<Venta*>& getVentas() const;
 };
 #endif
