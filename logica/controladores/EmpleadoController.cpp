@@ -1,4 +1,4 @@
-#include #include "EmpleadoController.h"
+#include "EmpleadoController.h"
 
 using namespace std;
 void EmpleadoController::agregarCliente(Cliente* cliente){
@@ -12,9 +12,9 @@ void EmpleadoController::eliminarCliente(Cliente* cliente){
         }
     }
 }
-Cliente* EmpleadoController::buscarCliente(string nombre){
+Cliente* EmpleadoController::buscarCliente(string rut){
     for (int i = 0; i < clientes.size(); i++) {
-        if (clientes[i]->getId() == id) {
+        if (clientes[i]->getRut() == rut) { // cambie id por rut
             return clientes[i];
         }
     }

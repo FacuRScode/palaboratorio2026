@@ -1,7 +1,7 @@
 #ifndef EMPLEADOCONTROLLER_H
 #define EMPLEADOCONTROLLER_H
-#include "Cliente.h"
-#include "OrdenDeCompra.h"
+#include "../dominio/Cliente.h"
+#include "../dominio/OrdenDeCompra.h"
 #include "AdminController.h"
 
 using namespace std;
