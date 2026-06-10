@@ -1,43 +1,30 @@
-
 //
 // Created by facun on 2/6/2026.
 //
 
 #include "VentaController.h"
+#include "EmpleadoController.h"
 #include <algorithm>
 
 using namespace std;
 
-VentaController::VentaController(AdminController* admin) : adminCtrl(admin) {}
+VentaController::VentaController(AdminController* admin, EmpleadoController* empleado) : adminCtrl(admin), empleadoCtrl(empleado) {}
 
 VentaController::~VentaController() {
-	for (Cliente* c : clientes) delete c;
 	for (Venta* v : ventas) delete v;
 }
 
-// Clientes
+// Clientes (delega en EmpleadoController)
 Cliente* VentaController::registrarCliente(const string& rut, const string& nombre, const string& apellido,
-											const string& direccion, const string& correo) {
-	if (buscarCliente(rut) != nullptr) return nullptr; // ya existe
-	Cliente* c = new Cliente(rut, nombre, apellido, direccion, correo);
-	clientes.push_back(c);
-	return c;
-}
-
-Cliente* VentaController::buscarCliente(const string& rut) const {
-	for (Cliente* c : clientes) {
-		if (c != nullptr && c->getRut() == rut) return c;
-	}
-	return nullptr;
-}
-
-vector<Cliente*> VentaController::listarClientes() const {
-	return clientes;
+                                            const string& direccion, const string& correo) {
+    if (empleadoCtrl == nullptr) return nullptr;
+    return empleadoCtrl->registrarCliente(rut, nombre, apellido, direccion, correo);
 }
 
 // Ventas
 Venta* VentaController::crearVenta(const string& rutCliente, DTFecha fecha, DTHora hora) {
-	Cliente* c = buscarCliente(rutCliente);
+	if (empleadoCtrl == nullptr) return nullptr;
+	Cliente* c = empleadoCtrl->buscarCliente(rutCliente);
 	if (c == nullptr) return nullptr;
 	Venta* v = new Venta(fecha, hora);
 	ventas.push_back(v);
@@ -64,7 +51,8 @@ vector<Venta*> VentaController::listarVentas() const {
 }
 
 vector<Venta*> VentaController::listarVentasPorCliente(const string& rut) const {
-	Cliente* c = buscarCliente(rut);
+	if (empleadoCtrl == nullptr) return {};
+	Cliente* c = empleadoCtrl->buscarCliente(rut);
 	if (c == nullptr) return {};
 	return c->getVentas();
 }
