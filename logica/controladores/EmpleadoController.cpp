@@ -40,3 +40,16 @@ void EmpleadoController::eliminarOrdenDeCompra(OrdenDeCompra* orden){
 vector<OrdenDeCompra*> EmpleadoController::listarOrdenesDeCompra() const {
     return ordenesDeCompra;
 }
+
+EmpleadoController* EmpleadoController::getInstanciaEmpleado(){
+    if(instanciaEmpleado != nullptr){
+        return instanciaEmpleado;
+    } else {
+        instanciaEmpleado = new EmpleadoController();
+        return instanciaEmpleado;
+    }
+}
+EmpleadoController::~EmpleadoController() {
+    for (Cliente* c : clientes) delete c;
+    for (OrdenDeCompra* o : ordenesDeCompra) delete o;
+}
