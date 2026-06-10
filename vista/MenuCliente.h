@@ -7,15 +7,13 @@
 
 #pragma once
 #include "../logica/controladores/VentaController.h"
-#include <string>
 
 class MenuCliente {
 private:
 	VentaController& ctrl;
 public:
-	MenuCliente(VentaController& controller);
+	explicit MenuCliente(VentaController& controller);
 	void mostrar();
 };
-
 
 #endif //PALABORATORIO2026_MENUCLIENTE_H
