@@ -36,3 +36,7 @@ void EmpleadoController::eliminarOrdenDeCompra(OrdenDeCompra* orden){
         }
     }
 }
+
+vector<OrdenDeCompra*> EmpleadoController::listarOrdenesDeCompra() const {
+    return ordenesDeCompra;
+}

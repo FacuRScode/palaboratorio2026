@@ -17,6 +17,7 @@ public:
     vector<Cliente*> listarClientes() const;
     void agregarOrdenDeCompra(OrdenDeCompra* orden);
     void eliminarOrdenDeCompra(OrdenDeCompra* orden);
+    vector<OrdenDeCompra*> listarOrdenesDeCompra() const;
     EmpleadoController(AdminController* adminController);
 };
 #endif
