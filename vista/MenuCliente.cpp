@@ -1,4 +1,3 @@
-
 //
 // Created by facun on 2/6/2026.
 //
@@ -14,26 +13,16 @@ MenuCliente::MenuCliente(VentaController& controller) : ctrl(controller) {}
 void MenuCliente::mostrar() {
 	while (true) {
 		cout << "\n--- Menu Cliente ---\n";
-		cout << "1. Registrar cliente\n";
-		cout << "2. Crear venta\n";
-		cout << "3. Agregar linea a venta\n";
-		cout << "4. Listar ventas de un cliente\n";
-		cout << "5. Calificar producto\n";
+		cout << "1. Crear venta\n";
+		cout << "2. Agregar linea a venta\n";
+		cout << "3. Listar ventas de un cliente\n";
+		cout << "4. Calificar producto\n";
 		cout << "0. Volver\n";
 		int op;
 		cout << "Seleccione una opcion: ";
 		cin >> op;
 		if (op == 0) return;
 		if (op == 1) {
-			string rut, nombre, apellido, direccion, correo;
-			cout << "RUT: "; cin >> rut;
-			cout << "Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nombre);
-			cout << "Apellido: "; getline(cin, apellido);
-			cout << "Direccion: "; getline(cin, direccion);
-			cout << "Correo: "; getline(cin, correo);
-			auto c = ctrl.registrarCliente(rut, nombre, apellido, direccion, correo);
-			cout << (c ? "Cliente registrado." : "Error: cliente ya existe.") << endl;
-		} else if (op == 2) {
 			string rut;
 			cout << "RUT cliente: "; cin >> rut;
 			int dia, mes, anio, hora, minuto, segundo;
@@ -43,7 +32,7 @@ void MenuCliente::mostrar() {
 			DTHora dh(hora, minuto, segundo);
 			Venta* v = ctrl.crearVenta(rut, fecha, dh);
 			cout << (v ? "Venta creada." : "Error creando venta (cliente no existe).") << endl;
-		} else if (op == 3) {
+		} else if (op == 2) {
 			auto ventas = ctrl.listarVentas();
 			if (ventas.empty()) { cout << "No hay ventas creadas." << endl; continue; }
 			cout << "Ventas disponibles:\n";
@@ -60,7 +49,7 @@ void MenuCliente::mostrar() {
 			cout << "Cantidad: "; cin >> cantidad;
 			bool ok = ctrl.agregarLineaAVenta(ventas[idx], codigo, cantidad);
 			cout << (ok ? "Linea agregada." : "No se pudo agregar linea (producto no existe/stock insuficiente/otro error).") << endl;
-		} else if (op == 4) {
+		} else if (op == 3) {
 			string rut;
 			cout << "RUT cliente: "; cin >> rut;
 			auto vlist = ctrl.listarVentasPorCliente(rut);
@@ -70,7 +59,7 @@ void MenuCliente::mostrar() {
 				cout << " Hora: " << v->getHora().getHora() << ":" << v->getHora().getMinuto() << ":" << v->getHora().getSegundo();
 				cout << " Total: " << v->calcularTotal() << "\n";
 			}
-		} else if (op == 5) {
+		} else if (op == 4) {
 			int codigo;
 			int punt;
 			string comentario;
@@ -89,4 +78,3 @@ void MenuCliente::mostrar() {
 		}
 	}
 }
-

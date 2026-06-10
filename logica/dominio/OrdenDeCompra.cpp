@@ -5,7 +5,11 @@ using namespace std;
 OrdenDeCompra::OrdenDeCompra(DTFecha fechaEmision, Estado estado, DTFecha fechaRecepcion) : fechaEmision(fechaEmision), estado(estado), fechaRecepcion(fechaRecepcion){}
 DTFecha OrdenDeCompra::getFechaEmision() {
   return this->fechaEmision;
-}DTFecha OrdenDeCompra::getFechaRecepcion() {
+}
+Estado OrdenDeCompra::getEstado() {
+  return this->estado;
+}
+DTFecha OrdenDeCompra::getFechaRecepcion() {
   return this->fechaRecepcion;
 }
 void OrdenDeCompra::setFechaEmision(DTFecha fechaEmision) {
