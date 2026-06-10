@@ -3,6 +3,7 @@
 #include "../dominio/Cliente.h"
 #include "../dominio/OrdenDeCompra.h"
 #include "AdminController.h"
+#pragma once
 
 using namespace std;
 class EmpleadoController{
