@@ -21,12 +21,16 @@ class EmpleadoController;
 
 class VentaController {
 private:
+	static VentaController* instanciaVenta;
 	vector<Venta*> ventas;
 	AdminController* adminCtrl; // para acceder a productos
 	EmpleadoController* empleadoCtrl; // para acceder a clientes
+	VentaController();
 public:
-	VentaController(AdminController* admin = nullptr, EmpleadoController* empleado = nullptr);
+	VentaController(AdminController* admin, EmpleadoController* empleado);
 	~VentaController();
+
+	static VentaController* getInstanciaVenta();
 
 	// Clientes (delega en EmpleadoController)
 	Cliente* registrarCliente(const string& rut, const string& nombre, const string& apellido,

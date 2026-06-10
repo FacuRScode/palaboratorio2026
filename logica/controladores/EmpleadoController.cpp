@@ -3,7 +3,13 @@
 
 using namespace std;
 
+// Inicializar el miembro estático
+EmpleadoController* EmpleadoController::instanciaEmpleado = nullptr;
+
 EmpleadoController::EmpleadoController(AdminController* adminController) : adminCtrl(adminController) {}
+
+// Constructor privado usado por el singleton
+EmpleadoController::EmpleadoController() : adminCtrl(nullptr) {}
 
 Cliente* EmpleadoController::registrarCliente(const string& rut, const string& nombre, const string& apellido,
                                             const string& direccion, const string& correo) {
@@ -42,13 +48,12 @@ vector<OrdenDeCompra*> EmpleadoController::listarOrdenesDeCompra() const {
 }
 
 EmpleadoController* EmpleadoController::getInstanciaEmpleado(){
-    if(instanciaEmpleado != nullptr){
-        return instanciaEmpleado;
-    } else {
+    if (instanciaEmpleado == nullptr) {
         instanciaEmpleado = new EmpleadoController();
-        return instanciaEmpleado;
     }
+    return instanciaEmpleado;
 }
+
 EmpleadoController::~EmpleadoController() {
     for (Cliente* c : clientes) delete c;
     for (OrdenDeCompra* o : ordenesDeCompra) delete o;

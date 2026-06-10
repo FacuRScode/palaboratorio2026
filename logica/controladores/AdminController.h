@@ -17,6 +17,7 @@ using namespace std;
 
 class AdminController {
 private:
+	static AdminController* instanciaAdmin;
 	vector<Producto*> productos;
 	vector<Categoria*> categorias;
 	vector<Empleado*> empleados;
@@ -25,6 +26,8 @@ private:
 public:
 	AdminController();
 	~AdminController();
+
+	static AdminController* getInstanciaAdmin();
 
 	// -- Productos -------------------------------------------------
 	Producto* crearProducto(int codigo, const string& nombre, const string& descripcion,

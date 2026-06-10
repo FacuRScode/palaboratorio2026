@@ -8,7 +8,20 @@
 
 using namespace std;
 
+// Inicializar el miembro estático
+VentaController* VentaController::instanciaVenta = nullptr;
+
 VentaController::VentaController(AdminController* admin, EmpleadoController* empleado) : adminCtrl(admin), empleadoCtrl(empleado) {}
+
+// Constructor privado usado por el singleton
+VentaController::VentaController() : adminCtrl(nullptr), empleadoCtrl(nullptr) {}
+
+VentaController* VentaController::getInstanciaVenta(){
+	if (instanciaVenta == nullptr) {
+		instanciaVenta = new VentaController();
+	}
+	return instanciaVenta;
+}
 
 VentaController::~VentaController() {
 	for (Venta* v : ventas) delete v;

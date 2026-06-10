@@ -7,7 +7,18 @@
 
 using namespace std;
 
+// Inicializar el miembro estático
+AdminController* AdminController::instanciaAdmin = nullptr;
+
+// Constructor privado usado por el singleton
 AdminController::AdminController() {}
+
+AdminController* AdminController::getInstanciaAdmin(){
+	if (instanciaAdmin == nullptr) {
+		instanciaAdmin = new AdminController();
+	}
+	return instanciaAdmin;
+}
 
 AdminController::~AdminController() {
 	for (Producto* p : productos) delete p;
