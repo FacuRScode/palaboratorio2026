@@ -7,6 +7,8 @@
 using namespace std;
 class EmpleadoController{
 private:
+    static EmpleadoController* instanciaEmpleado;
+    EmpleadoController();
     vector<Cliente*> clientes;
     vector<OrdenDeCompra*> ordenesDeCompra;
     AdminController* adminCtrl;
@@ -18,5 +20,8 @@ public:
     void agregarOrdenDeCompra(OrdenDeCompra* orden);
     void eliminarOrdenDeCompra(OrdenDeCompra* orden);
     EmpleadoController(AdminController* adminController);
+
+    static EmpleadoController* getInstanciaEmpleado();
+    ~EmpleadoController();
 };
 #endif
