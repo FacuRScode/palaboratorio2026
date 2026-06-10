@@ -11,10 +11,10 @@ private:
     vector<OrdenDeCompra*> ordenesDeCompra;
     AdminController* adminCtrl;
 public:
-    void agregarCliente(Cliente* cliente);
-    void eliminarCliente(Cliente* cliente);
-    Cliente* buscarCliente(string nombre);
-    vector<Cliente*> listarClientes();
+    Cliente* registrarCliente(const string& rut, const string& nombre, const string& apellido,
+                              const string& direccion, const string& correo);
+    Cliente* buscarCliente(const string& rut) const;
+    vector<Cliente*> listarClientes() const;
     void agregarOrdenDeCompra(OrdenDeCompra* orden);
     void eliminarOrdenDeCompra(OrdenDeCompra* orden);
     EmpleadoController(AdminController* adminController);

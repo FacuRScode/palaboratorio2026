@@ -1,4 +1,3 @@
-
 //
 // Created by facun on 2/6/2026.
 //
@@ -9,29 +8,29 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "../dominio/Cliente.h"
 #include "../dominio/Venta.h"
 #include "../dominio/LineaDetalleVenta.h"
 #include "../dominio/Calificacion.h"
 #include "../dominio/Puntaje.h"
+#include "../dominio/Cliente.h"
 #include "AdminController.h"
 
 using namespace std;
 
+class EmpleadoController;
+
 class VentaController {
 private:
-	vector<Cliente*> clientes;
 	vector<Venta*> ventas;
 	AdminController* adminCtrl; // para acceder a productos
+	EmpleadoController* empleadoCtrl; // para acceder a clientes
 public:
-	VentaController(AdminController* admin = nullptr);
+	VentaController(AdminController* admin = nullptr, EmpleadoController* empleado = nullptr);
 	~VentaController();
 
-	// Clientes
+	// Clientes (delega en EmpleadoController)
 	Cliente* registrarCliente(const string& rut, const string& nombre, const string& apellido,
 							  const string& direccion, const string& correo);
-	Cliente* buscarCliente(const string& rut) const;
-	vector<Cliente*> listarClientes() const;
 
 	// Ventas
 	Venta* crearVenta(const string& rutCliente, DTFecha fecha, DTHora hora);

@@ -1,12 +1,14 @@
 #include <iostream>
 #include "logica/controladores/AdminController.h"
+#include "logica/controladores/EmpleadoController.h"
 #include "logica/controladores/VentaController.h"
 #include "vista/MenuAdministrador.h"
 #include "vista/MenuCliente.h"
 
 int main() {
     AdminController admin;
-    VentaController ventas(&admin);
+    EmpleadoController empleado(&admin);
+    VentaController ventas(&admin, &empleado);
 
     MenuAdministrador menuAdmin(admin);
     MenuCliente menuCliente(ventas);
