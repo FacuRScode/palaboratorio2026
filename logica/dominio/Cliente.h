@@ -3,14 +3,12 @@
 #include <string>
 #include <vector>
 #include "Calificacion.h"
-#include "Venta.h"
 
 using namespace std;
 class Cliente{
     private:
         string rut, nombre, apellido, direccion, correo;
         vector<Calificacion*> calificaciones;
-        vector<Venta*> ventas;
     public:
         Cliente(string rut, string nombre, string apellido, string direccion, string correo);
 
@@ -26,8 +24,8 @@ class Cliente{
         void setDireccion(string direccion);
         void setCorreo(string correo);
 
-        // Ventas y calificaciones
-        void addVenta(Venta* venta);
-        const vector<Venta*>& getVentas() const;
+    // Calificaciones
+    void addCalificacion(Calificacion* calificacion);
+    const vector<Calificacion*>& getCalificaciones() const;
 };
 #endif

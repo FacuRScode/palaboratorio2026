@@ -19,6 +19,9 @@ string Proveedor::getTelefono() {
 string Proveedor::getContactoComercial() {
     return this->contactoComercial;
 }
+const vector<ProveedorProducto*>& Proveedor::getProductosOfrecidos() const {
+    return this->productosOfrecidos;
+}
 void Proveedor::setRut(string rut) {
     this->rut = rut;
 }
@@ -30,4 +33,7 @@ void Proveedor::setTelefono(string telefono) {
 }
 void Proveedor::setContactoComercial(string contactoComercial) {
     this->contactoComercial = contactoComercial;
+}
+void Proveedor::addProveedorProducto(ProveedorProducto* productosOfrecidos) {
+    this->productosOfrecidos.push_back(productosOfrecidos);
 }

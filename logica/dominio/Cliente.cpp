@@ -44,12 +44,12 @@ void Cliente::setCorreo(string correo) {
 	this->correo = correo;
 }
 
-void Cliente::addVenta(Venta* venta) {
-	if (venta != nullptr) this->ventas.push_back(venta);
+void Cliente::addCalificacion(Calificacion* calificacion) {
+	this->calificaciones.push_back(calificacion);
 }
 
-const vector<Venta*>& Cliente::getVentas() const {
-	return this->ventas;
+const vector<Calificacion*>& Cliente::getCalificaciones() const {
+	return this->calificaciones;
 }
 
 

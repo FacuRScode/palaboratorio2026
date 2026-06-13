@@ -2,17 +2,24 @@
 
 using namespace std;
 Venta::Venta(DTFecha fecha, DTHora hora) : fecha(fecha), hora(hora) {}
+Venta::Venta(DTFecha fecha, DTHora hora, Cliente* cliente) : fecha(fecha), hora(hora), cliente(cliente) {}
 DTFecha Venta::getFecha() {
     return this->fecha;
 }
 DTHora Venta::getHora() {
     return this->hora;
 }
+Cliente* Venta::getCliente() {
+    return this->cliente;
+}
 void Venta::setFecha(DTFecha fecha) {
     this->fecha = fecha;
 }
 void Venta::setHora(DTHora hora) {
     this->hora = hora;
+}
+void Venta::setCliente(Cliente* cliente) {
+    this->cliente = cliente;
 }
 
 void Venta::addLinea(LineaDetalleVenta* linea) {
@@ -32,6 +39,9 @@ float Venta::calcularTotal() const {
 }
 
 Venta::~Venta() {
-    for (auto l : detalleVenta) delete l;
+    for (LineaDetalleVenta* linea : detalleVenta) {
+        delete linea;
+    }
+    detalleVenta.clear();
 }
 

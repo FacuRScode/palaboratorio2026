@@ -1,23 +1,18 @@
 #ifndef PRODUCTO_H
 #define PRODUCTO_H
 #include <string>
-#include <vector>
-#include "Calificacion.h"
-#include "LineaDetalleVenta.h"
-#include "LineaDetalleCompra.h"
+#include "Categoria.h"
 
 
 using namespace std;
 class Producto{
-    private:
-        int codigo, stock;
-        string nombre, descripcion;
-        float precioVentaActual, puntajePromedio;
-        vector<Calificacion*> calificaciones;
-        vector<LineaDetalleVenta*> detalleVenta;
-        vector<LineaDetalleCompra*> detalleCompra;
-    public:
-    Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, float puntajePromedio);
+private:
+    int codigo, stock;
+    string nombre, descripcion;
+    float precioVentaActual, puntajePromedio;
+    Categoria* categoria;
+public:
+    Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, float puntajePromedio, Categoria* categoria);
 
     int getCodigo();
     string getNombre();
@@ -25,6 +20,7 @@ class Producto{
     float getPrecioVentaActual();
     int getStock();
     float getPuntajePromedio();
+    Categoria* getCategoria();
 
     void setCodigo(int codigo);
     void setNombre(string nombre);
@@ -32,12 +28,6 @@ class Producto{
     void setPrecioVentaActual(float precioVentaActual);
     void setStock(int stock);
     void setPuntajePromedio(float puntajePromedio);
-
-    // Calificaciones y detalle de ventas
-    void addCalificacion(Calificacion* cal);
-    const vector<Calificacion*>& getCalificaciones() const;
-
-    void addLineaVenta(LineaDetalleVenta* linea);
-    const vector<LineaDetalleVenta*>& getDetalleVenta() const;
+    void setCategoria(Categoria* categoria);
 };
 #endif

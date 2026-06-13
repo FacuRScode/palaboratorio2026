@@ -1,7 +1,7 @@
 #include "Calificacion.h"
 
-Calificacion::Calificacion(Puntaje puntaje, string comentario, DTFecha fecha)
-	: puntaje(puntaje), comentario(comentario), fecha(fecha) {}
+Calificacion::Calificacion(Puntaje puntaje, string comentario, DTFecha fecha, Producto* productoCalificado)
+	: puntaje(puntaje), comentario(comentario), fecha(fecha), productoCalificado(productoCalificado) {}
 
 Puntaje Calificacion::getPuntaje(){
 	return this->puntaje;
@@ -13,6 +13,10 @@ string Calificacion::getComentario(){
 
 DTFecha Calificacion::getFecha(){
 	return this->fecha;
+}
+
+Producto* Calificacion::getProductoCalificado(){
+	return this->productoCalificado;
 }
 
 void Calificacion::setPuntaje(Puntaje puntaje){
@@ -27,3 +31,6 @@ void Calificacion::setFecha(DTFecha fecha){
 	this->fecha = fecha;
 }
 
+void Calificacion::setProductoCalificado(Producto* productoCalificado){
+	this->productoCalificado = productoCalificado;
+}

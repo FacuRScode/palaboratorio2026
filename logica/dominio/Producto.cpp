@@ -1,12 +1,13 @@
 #include "Producto.h"
 
 using namespace std;
-Producto::Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, float puntajePromedio) {
+Producto::Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, float puntajePromedio, Categoria* categoria) {
     this->codigo = codigo;
     this->nombre = nombre;
     this->descripcion = descripcion;
     this->precioVentaActual = precioVentaActual;
     this->stock = stock;
+    this->categoria = categoria;
     this->puntajePromedio = puntajePromedio;
 }
 int Producto::getCodigo() {
@@ -19,13 +20,16 @@ string Producto::getDescripcion() {
     return this->descripcion;
 }
 float Producto::getPrecioVentaActual() {
- return this->precioVentaActual;
+    return this->precioVentaActual;
 }
 int Producto::getStock() {
     return this->stock;
 }
 float Producto::getPuntajePromedio() {
     return this->puntajePromedio;
+}
+Categoria* Producto::getCategoria() {
+    return this->categoria;
 }
 void Producto::setCodigo(int codigo) {
     this->codigo = codigo;
@@ -45,19 +49,6 @@ void Producto::setStock(int stock) {
 void Producto::setPuntajePromedio(float puntajePromedio) {
     this->puntajePromedio = puntajePromedio;
 }
-
-void Producto::addCalificacion(Calificacion* cal) {
-    if (cal != nullptr) this->calificaciones.push_back(cal);
-}
-
-const vector<Calificacion*>& Producto::getCalificaciones() const {
-    return this->calificaciones;
-}
-
-void Producto::addLineaVenta(LineaDetalleVenta* linea) {
-    if (linea != nullptr) this->detalleVenta.push_back(linea);
-}
-
-const vector<LineaDetalleVenta*>& Producto::getDetalleVenta() const {
-    return this->detalleVenta;
+void Producto::setCategoria(Categoria* categoria) {
+    this->categoria = categoria;
 }
