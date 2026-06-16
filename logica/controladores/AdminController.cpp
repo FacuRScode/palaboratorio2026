@@ -31,7 +31,7 @@ AdminController::~AdminController() {
 Producto* AdminController::crearProducto(int codigo, const string& nombre, const string& descripcion,
 										 float precioVentaActual, int stock, float puntajePromedio) {
 	if (buscarProducto(codigo) != nullptr) return nullptr; // ya existe
-	Producto* p = new Producto(codigo, nombre, descripcion, precioVentaActual, stock, puntajePromedio);
+	Producto* p = new Producto(codigo, nombre, descripcion, precioVentaActual, stock, puntajePromedio, nullptr);
 	productos.push_back(p);
 	return p;
 }
@@ -94,7 +94,7 @@ bool AdminController::asignarProductoACategoria(int codigoProducto, const string
 	Producto* p = buscarProducto(codigoProducto);
 	Categoria* c = buscarCategoria(nombreCategoria);
 	if (p == nullptr || c == nullptr) return false;
-	c->addProducto(p);
+	p->setCategoria(c);
 	return true;
 }
 

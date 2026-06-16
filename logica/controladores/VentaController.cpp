@@ -39,9 +39,8 @@ Venta* VentaController::crearVenta(const string& rutCliente, DTFecha fecha, DTHo
 	if (empleadoCtrl == nullptr) return nullptr;
 	Cliente* c = empleadoCtrl->buscarCliente(rutCliente);
 	if (c == nullptr) return nullptr;
-	Venta* v = new Venta(fecha, hora);
+	Venta* v = new Venta(fecha, hora, c);
 	ventas.push_back(v);
-	c->addVenta(v);
 	return v;
 }
 
@@ -51,8 +50,8 @@ bool VentaController::agregarLineaAVenta(Venta* venta, int codigoProducto, int c
 	Producto* p = adminCtrl->buscarProducto(codigoProducto);
 	if (p == nullptr) return false;
 	if (p->getStock() < cantidad) return false;
-	// crear linea con precio actual del producto
-	LineaDetalleVenta* linea = new LineaDetalleVenta(cantidad, p->getPrecioVentaActual());
+	// crear linea con precio actual del producto y referencia al producto
+	LineaDetalleVenta* linea = new LineaDetalleVenta(cantidad, p->getPrecioVentaActual(), p);
 	venta->addLinea(linea);
 	// disminuir stock
 	p->setStock(p->getStock() - cantidad);
@@ -64,10 +63,13 @@ vector<Venta*> VentaController::listarVentas() const {
 }
 
 vector<Venta*> VentaController::listarVentasPorCliente(const string& rut) const {
-	if (empleadoCtrl == nullptr) return {};
-	Cliente* c = empleadoCtrl->buscarCliente(rut);
-	if (c == nullptr) return {};
-	return c->getVentas();
+	vector<Venta*> ventasCliente;
+	for (Venta* v : ventas) {
+		if (v->getCliente() != nullptr && v->getCliente()->getRut() == rut) {
+			ventasCliente.push_back(v);
+		}
+	}
+	return ventasCliente;
 }
 
 // Calificaciones
@@ -75,7 +77,6 @@ bool VentaController::calificarProducto(int codigoProducto, Puntaje puntaje, con
 	if (adminCtrl == nullptr) return false;
 	Producto* p = adminCtrl->buscarProducto(codigoProducto);
 	if (p == nullptr) return false;
-	Calificacion* cal = new Calificacion(puntaje, comentario, fecha);
-	p->addCalificacion(cal);
+	Calificacion* cal = new Calificacion(puntaje, comentario, fecha, p);
 	return true;
 }

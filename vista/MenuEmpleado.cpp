@@ -56,7 +56,7 @@ void MenuEmpleado::mostrar() {
 			else if (est == 2) estado = Estado::Cancelada;
 			DTFecha fE(diaE, mesE, anioE);
 			DTFecha fR(diaR, mesR, anioR);
-			OrdenDeCompra* orden = new OrdenDeCompra(fE, estado, fR);
+			OrdenDeCompra* orden = new OrdenDeCompra(fE, estado, fR, nullptr);
 			ctrl.agregarOrdenDeCompra(orden);
 			cout << "Orden de compra agregada." << endl;
 		} else if (op == 5) {

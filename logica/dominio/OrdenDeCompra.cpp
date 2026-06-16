@@ -37,11 +37,11 @@ void OrdenDeCompra::addLineaDetalleCompra(LineaDetalleCompra* linea) {
 }
 
 float OrdenDeCompra::calcularTotal() const {
-  float total = 0.0f;
-  for (auto l : detalleCompra) {
-    if (l != nullptr) total += l->getCantidad() * l->getPrecioCompra();
-  }
-  return total;
+    float total = 0.0f;
+    for (auto l : detalleCompra) {
+        if (l != nullptr && l->getProducto() != nullptr) total += l->getCantidad() * l->getProducto()->getPrecioVentaActual();
+    }
+    return total;
 }
 
 OrdenDeCompra::~OrdenDeCompra() {
