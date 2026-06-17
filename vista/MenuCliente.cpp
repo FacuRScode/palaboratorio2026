@@ -1,27 +1,31 @@
-//
-// Created by facun on 2/6/2026.
-//
-
 #include "MenuCliente.h"
 #include <iostream>
 #include <limits>
 
 using namespace std;
 
-MenuCliente::MenuCliente(VentaController& controller) : ctrl(controller) {}
+MenuCliente::MenuCliente(VentaController& controller, AuthController* auth) : ctrl(controller), authCtrl(auth) {}
 
 void MenuCliente::mostrar() {
 	while (true) {
 		cout << "\n--- Menu Cliente ---\n";
+		if (authCtrl && authCtrl->haySesionActiva()) {
+			Sesion s = authCtrl->getSesionActual();
+			cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
+		}
 		cout << "1. Crear venta\n";
 		cout << "2. Agregar linea a venta\n";
 		cout << "3. Listar ventas de un cliente\n";
 		cout << "4. Calificar producto\n";
-		cout << "0. Volver\n";
+		cout << "0. Cerrar sesion\n";
 		int op;
 		cout << "Seleccione una opcion: ";
 		cin >> op;
-		if (op == 0) return;
+		if (op == 0) {
+			if (authCtrl) authCtrl->cerrarSesion();
+			cout << "Sesion cerrada." << endl;
+			return;
+		}
 		if (op == 1) {
 			string rut;
 			cout << "RUT cliente: "; cin >> rut;

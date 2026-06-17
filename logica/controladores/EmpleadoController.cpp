@@ -12,9 +12,9 @@ EmpleadoController::EmpleadoController(AdminController* adminController) : admin
 EmpleadoController::EmpleadoController() : adminCtrl(nullptr) {}
 
 Cliente* EmpleadoController::registrarCliente(const string& rut, const string& nombre, const string& apellido,
-                                            const string& direccion, const string& correo) {
+                                            const string& direccion, const string& correo, const string& contrasena) {
     if (buscarCliente(rut) != nullptr) return nullptr; // ya existe
-    Cliente* c = new Cliente(rut, nombre, apellido, direccion, correo);
+    Cliente* c = new Cliente(rut, nombre, apellido, direccion, correo, contrasena);
     clientes.push_back(c);
     return c;
 }

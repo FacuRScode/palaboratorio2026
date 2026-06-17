@@ -1,36 +1,41 @@
-//
-// Created by facun on 2/6/2026.
-//
-
 #include "MenuEmpleado.h"
 #include <iostream>
 #include <limits>
 
 using namespace std;
 
-MenuEmpleado::MenuEmpleado(EmpleadoController& controller) : ctrl(controller) {}
+MenuEmpleado::MenuEmpleado(EmpleadoController& controller, AuthController* auth) : ctrl(controller), authCtrl(auth) {}
 
 void MenuEmpleado::mostrar() {
 	while (true) {
 		cout << "\n--- Menu Empleado ---\n";
+		if (authCtrl && authCtrl->haySesionActiva()) {
+			Sesion s = authCtrl->getSesionActual();
+			cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
+		}
 		cout << "1. Registrar cliente\n";
 		cout << "2. Buscar cliente\n";
 		cout << "3. Listar clientes\n";
 		cout << "4. Agregar orden de compra\n";
 		cout << "5. Eliminar orden de compra\n";
-		cout << "0. Volver\n";
+		cout << "0. Cerrar sesion\n";
 		int op;
 		cout << "Seleccione una opcion: ";
 		cin >> op;
-		if (op == 0) return;
+		if (op == 0) {
+			if (authCtrl) authCtrl->cerrarSesion();
+			cout << "Sesion cerrada." << endl;
+			return;
+		}
 		if (op == 1) {
-			string rut, nombre, apellido, direccion, correo;
+			string rut, nombre, apellido, direccion, correo, contrasena;
 			cout << "RUT: "; cin >> rut;
 			cout << "Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nombre);
 			cout << "Apellido: "; getline(cin, apellido);
 			cout << "Direccion: "; getline(cin, direccion);
 			cout << "Correo: "; getline(cin, correo);
-			auto c = ctrl.registrarCliente(rut, nombre, apellido, direccion, correo);
+			cout << "Contrasena: "; getline(cin, contrasena);
+			auto c = ctrl.registrarCliente(rut, nombre, apellido, direccion, correo, contrasena);
 			cout << (c ? "Cliente registrado." : "Error: cliente ya existe.") << endl;
 		} else if (op == 2) {
 			string rut;

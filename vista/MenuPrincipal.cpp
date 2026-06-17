@@ -1,29 +1,63 @@
-//
-// Created by facun on 2/6/2026.
-//
-
 #include "MenuPrincipal.h"
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
 MenuPrincipal::MenuPrincipal(AdminController& admin, EmpleadoController& empleado, VentaController& ventas)
-	: menuAdmin(admin), menuEmpleado(empleado), menuCliente(ventas) {}
+	: adminCtrl(admin), empleadoCtrl(empleado), ventaCtrl(ventas),
+	  authCtrl(&admin, &empleado),
+	  menuAdmin(admin, &authCtrl),
+	  menuEmpleado(empleado, &authCtrl),
+	  menuCliente(ventas, &authCtrl) {}
 
 void MenuPrincipal::mostrar() {
 	while (true) {
-		cout << "\n--- Sistema ---\n";
-		cout << "1. Administrador\n";
-		cout << "2. Empleado\n";
-		cout << "3. Cliente\n";
-		cout << "0. Salir\n";
-		int op;
-		cout << "Seleccione una opcion: ";
-		cin >> op;
-		if (op == 0) break;
-		if (op == 1) menuAdmin.mostrar();
-		else if (op == 2) menuEmpleado.mostrar();
-		else if (op == 3) menuCliente.mostrar();
-		else cout << "Opcion invalida." << endl;
+		cout << "\n=== Bienvenido al Sistema ===\n";
+		if (!authCtrl.haySesionActiva()) {
+			mostrarLogin();
+		} else {
+			mostrarMenuSegunRol();
+		}
+	}
+}
+
+void MenuPrincipal::mostrarLogin() {
+	while (true) {
+		cout << "\n--- Iniciar Sesion ---\n";
+		string correo, contrasena;
+		cout << "Correo electronico: ";
+		cin >> correo;
+		cout << "Contrasena: ";
+		cin >> contrasena;
+
+		if (authCtrl.iniciarSesion(correo, contrasena)) {
+			Sesion sesion = authCtrl.getSesionActual();
+			cout << "\nInicio de sesion exitoso. Bienvenido/a " << sesion.nombre << " (" << sesion.rol << ")" << endl;
+			return; // sale del login, va al menu de rol
+		} else {
+			cout << "\nError: Correo o contrasena incorrectos." << endl;
+			cout << "1. Reintentar\n";
+			cout << "2. Cancelar (salir)\n";
+			int op;
+			cout << "Seleccione una opcion: ";
+			cin >> op;
+			if (op == 2) {
+				cout << "Operacion cancelada. Saliendo del sistema..." << endl;
+				exit(0);
+			}
+			// Si op == 1, reintenta
+		}
+	}
+}
+
+void MenuPrincipal::mostrarMenuSegunRol() {
+	Sesion sesion = authCtrl.getSesionActual();
+	if (sesion.rol == "Administrador") {
+		menuAdmin.mostrar();
+	} else if (sesion.rol == "Empleado") {
+		menuEmpleado.mostrar();
+	} else if (sesion.rol == "Cliente") {
+		menuCliente.mostrar();
 	}
 }

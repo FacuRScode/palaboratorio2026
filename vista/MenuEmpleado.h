@@ -1,18 +1,16 @@
-//
-// Created by facun on 2/6/2026.
-//
-
 #ifndef PALABORATORIO2026_MENUEMPLEADO_H
 #define PALABORATORIO2026_MENUEMPLEADO_H
 
 #pragma once
 #include "../logica/controladores/EmpleadoController.h"
+#include "../logica/controladores/AuthController.h"
 
 class MenuEmpleado {
 private:
 	EmpleadoController& ctrl;
+	AuthController* authCtrl;
 public:
-	explicit MenuEmpleado(EmpleadoController& controller);
+	MenuEmpleado(EmpleadoController& controller, AuthController* auth);
 	void mostrar();
 };
 

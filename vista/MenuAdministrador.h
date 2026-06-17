@@ -1,7 +1,3 @@
-//
-// Created by facun on 2/6/2026.
-//
-
 #ifndef PALABORATORIO2026_MENUADMINISTRADOR_H
 #define PALABORATORIO2026_MENUADMINISTRADOR_H
 
@@ -9,10 +5,12 @@
 #include <vector>
 #include <iostream>
 #include "../logica/controladores/AdminController.h"
+#include "../logica/controladores/AuthController.h"
 
 class MenuAdministrador {
 private:
 	AdminController& ctrl;
+	AuthController* authCtrl;
 
 	void menuProductos();
 	void menuCategorias();
@@ -20,10 +18,8 @@ private:
 	void menuProveedores();
 
 public:
-	explicit MenuAdministrador(AdminController& controller);
+	MenuAdministrador(AdminController& controller, AuthController* auth);
 	void mostrar();
 };
 
 #endif //PALABORATORIO2026_MENUADMINISTRADOR_H
-
-
