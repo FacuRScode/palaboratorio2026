@@ -57,6 +57,8 @@ public:
 	Proveedor* buscarProveedor(const string& rut) const;
 	bool eliminarProveedor(const string& rut);
 	vector<Proveedor*> listarProveedores() const;
+	bool modificarProveedor(const string& rut, const string& empresa,
+							 const string& telefono, const string& contactoComercial);
 };
 
 #endif //PALABORATORIO2026_ADMINCONTROLLER_H
