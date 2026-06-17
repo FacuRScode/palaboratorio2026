@@ -15,7 +15,7 @@ private:
     AdminController* adminCtrl;
 public:
     Cliente* registrarCliente(const string& rut, const string& nombre, const string& apellido,
-                              const string& direccion, const string& correo);
+                              const string& direccion, const string& correo, const string& contrasena = "");
     Cliente* buscarCliente(const string& rut) const;
     vector<Cliente*> listarClientes() const;
     void agregarOrdenDeCompra(OrdenDeCompra* orden);

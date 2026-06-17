@@ -6,16 +6,20 @@
 #include "MenuAdministrador.h"
 #include <limits>
 
-MenuAdministrador::MenuAdministrador(AdminController& controller) : ctrl(controller) {}
+MenuAdministrador::MenuAdministrador(AdminController& controller, AuthController* auth) : ctrl(controller), authCtrl(auth) {}
 
 void MenuAdministrador::mostrar() {
 	while (true) {
 		std::cout << "\n--- Menu Administrador ---\n";
+		if (authCtrl && authCtrl->haySesionActiva()) {
+			Sesion s = authCtrl->getSesionActual();
+			std::cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
+		}
 		std::cout << "1. Productos\n";
 		std::cout << "2. Categorias\n";
 		std::cout << "3. Empleados\n";
 		std::cout << "4. Proveedores\n";
-		std::cout << "0. Volver\n";
+		std::cout << "0. Cerrar sesion\n";
 		int op;
 		std::cout << "Seleccione una opcion: ";
 		std::cin >> op;
@@ -24,7 +28,10 @@ void MenuAdministrador::mostrar() {
 			case 2: menuCategorias(); break;
 			case 3: menuEmpleados(); break;
 			case 4: menuProveedores(); break;
-			case 0: return;
+			case 0:
+				if (authCtrl) authCtrl->cerrarSesion();
+				std::cout << "Sesion cerrada." << std::endl;
+				return;
 			default: std::cout << "Opcion invalida." << std::endl;
 		}
 	}
@@ -130,30 +137,88 @@ void MenuAdministrador::menuCategorias() {
 	}
 }
 
-void MenuAdministrador::menuEmpleados() {
-	while (true) {
-		std::cout << "\n--- Empleados ---\n";
-		std::cout << "1. Crear empleado\n";
-		std::cout << "2. Listar empleados\n";
-		std::cout << "3. Buscar empleado por correo\n";
-		std::cout << "4. Eliminar empleado por correo\n";
-		std::cout << "0. Volver\n";
-		int op;
-		std::cout << "Seleccione una opcion: ";
-		std::cin >> op;
-		if (op == 0) return;
-		if (op == 1) {
-			std::string nombre;
-			std::string correo;
-			std::string contrasena;
-			std::string rol;
-			std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
-			std::cout << "Correo: "; std::cin >> correo;
-			std::cout << "Contrasena: "; std::cin >> contrasena;
-			std::cout << "Rol: "; std::cin >> rol;
-			auto e = ctrl.crearEmpleado(nombre, correo, contrasena, rol);
-			std::cout << (e ? "Empleado creado." : "Error creando empleado.") << std::endl;
-		} else if (op == 2) {
+	void MenuAdministrador::menuEmpleados() {
+		while (true) {
+			std::cout << "\n--- Empleados ---\n";
+			std::cout << "1. Alta de empleado\n";
+			std::cout << "2. Listar empleados\n";
+			std::cout << "3. Buscar empleado por correo\n";
+			std::cout << "4. Eliminar empleado por correo\n";
+			std::cout << "0. Volver\n";
+			int op;
+			std::cout << "Seleccione una opcion: ";
+			std::cin >> op;
+			if (op == 0) return;
+			if (op == 1) {
+				std::string nombre;
+				std::string correo;
+				std::string contrasena;
+				std::string rol;
+				bool datosValidos = false;
+				while (!datosValidos) {
+					std::cout << "\n--- Alta de empleado ---\n";
+					std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
+					std::cout << "Correo: "; std::cin >> correo;
+					std::cout << "Contrasena: "; std::cin >> contrasena;
+
+					// Verificar si el correo ya esta registrado
+					if (ctrl.buscarEmpleado(correo) != nullptr) {
+						std::cout << "\nError: Ya existe un empleado registrado con el correo '" << correo << "'." << std::endl;
+						std::cout << "1. Reingresar los datos\n";
+						std::cout << "2. Cancelar\n";
+						int opcionError;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionError;
+						if (opcionError == 2) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break; // Sale del bucle de ingreso, vuelve al menu de empleados
+						}
+						continue; // Reintentar ingreso de datos
+					}
+
+					// Seleccion de rol
+					while (true) {
+						std::cout << "\nSeleccione el rol del nuevo usuario:\n";
+						std::cout << "1. Empleado\n";
+						std::cout << "2. Administrador\n";
+						int opcionRol;
+						std::cout << "Opcion: ";
+						std::cin >> opcionRol;
+						if (opcionRol == 1) {
+							rol = "Empleado";
+							break;
+						} else if (opcionRol == 2) {
+							rol = "Administrador";
+							break;
+						} else {
+							std::cout << "Opcion invalida. Intente nuevamente." << std::endl;
+						}
+					}
+
+					// Mostrar resumen y confirmar
+					std::cout << "\n--- Resumen de datos ingresados ---\n";
+					std::cout << "Nombre: " << nombre << "\n";
+					std::cout << "Correo: " << correo << "\n";
+					std::cout << "Rol: " << rol << "\n";
+					std::cout << "1. Confirmar\n";
+					std::cout << "2. Cancelar\n";
+					int opcionConfirmar;
+					std::cout << "Seleccione una opcion: ";
+					std::cin >> opcionConfirmar;
+					if (opcionConfirmar == 1) {
+						auto e = ctrl.crearEmpleado(nombre, correo, contrasena, rol);
+						if (e) {
+							std::cout << "Empleado creado exitosamente." << std::endl;
+						} else {
+							std::cout << "Error al crear el empleado." << std::endl;
+						}
+						datosValidos = true;
+					} else {
+						std::cout << "Operacion cancelada." << std::endl;
+						datosValidos = true;
+					}
+				}
+			} else if (op == 2) {
 			auto lista = ctrl.listarEmpleados();
 			std::cout << "Empleados:\n";
 			for (auto e : lista) {

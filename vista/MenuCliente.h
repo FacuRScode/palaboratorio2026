@@ -1,18 +1,16 @@
-//
-// Created by facun on 2/6/2026.
-//
-
 #ifndef PALABORATORIO2026_MENUCLIENTE_H
 #define PALABORATORIO2026_MENUCLIENTE_H
 
 #pragma once
 #include "../logica/controladores/VentaController.h"
+#include "../logica/controladores/AuthController.h"
 
 class MenuCliente {
 private:
 	VentaController& ctrl;
+	AuthController* authCtrl;
 public:
-	explicit MenuCliente(VentaController& controller);
+	MenuCliente(VentaController& controller, AuthController* auth);
 	void mostrar();
 };
 
