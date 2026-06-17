@@ -80,3 +80,15 @@ bool VentaController::calificarProducto(int codigoProducto, Puntaje puntaje, con
 	Calificacion* cal = new Calificacion(puntaje, comentario, fecha, p);
 	return true;
 }
+
+bool VentaController::productoEstaEnVentas(int codigoProducto) const {
+	for (Venta* v : ventas) {
+		if (v == nullptr) continue;
+		for (LineaDetalleVenta* linea : v->getDetalle()) {
+			if (linea != nullptr && linea->getProducto() != nullptr && linea->getProducto()->getCodigo() == codigoProducto) {
+				return true;
+			}
+		}
+	}
+	return false;
+}

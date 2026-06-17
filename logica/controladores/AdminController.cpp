@@ -29,9 +29,11 @@ AdminController::~AdminController() {
 
 // -- Productos -------------------------------------------------
 Producto* AdminController::crearProducto(int codigo, const string& nombre, const string& descripcion,
-										 float precioVentaActual, int stock, float puntajePromedio) {
+										 float precioVentaActual, int stock, int stockMinimo, const string& nombreCategoria) {
 	if (buscarProducto(codigo) != nullptr) return nullptr; // ya existe
-	Producto* p = new Producto(codigo, nombre, descripcion, precioVentaActual, stock, puntajePromedio, nullptr);
+	Categoria* cat = buscarCategoria(nombreCategoria);
+	if (cat == nullptr) return nullptr; // categoria no existe
+	Producto* p = new Producto(codigo, nombre, descripcion, precioVentaActual, stock, stockMinimo, 0, cat);
 	productos.push_back(p);
 	return p;
 }
@@ -43,10 +45,63 @@ Producto* AdminController::buscarProducto(int codigo) const {
 	return nullptr;
 }
 
-bool AdminController::eliminarProducto(int codigo) {
+Producto* AdminController::buscarProductoPorNombre(const string& nombre) const {
+	for (Producto* p : productos) {
+		if (p != nullptr && p->getNombre() == nombre) return p;
+	}
+	return nullptr;
+}
+
+bool AdminController::modificarProducto(int codigo, const string& nuevoNombre, const string& nuevaDescripcion,
+									   float nuevoPrecio, const string& nombreCategoria, int nuevoStockMinimo) {
+	Producto* p = buscarProducto(codigo);
+	if (p == nullptr) return false;
+
+	// Si el nombre cambia, verificar que no exista otro producto con ese nombre
+	if (p->getNombre() != nuevoNombre && buscarProductoPorNombre(nuevoNombre) != nullptr) return false;
+
+	Categoria* cat = buscarCategoria(nombreCategoria);
+	if (cat == nullptr) return false;
+
+	p->setNombre(nuevoNombre);
+	p->setDescripcion(nuevaDescripcion);
+	p->setPrecioVentaActual(nuevoPrecio);
+	p->setCategoria(cat);
+	p->setStockMinimo(nuevoStockMinimo);
+	return true;
+}
+
+bool AdminController::productoAsociadoAProveedor(int codigoProducto) const {
+	for (Proveedor* pr : proveedores) {
+		if (pr == nullptr) continue;
+		for (ProveedorProducto* pp : pr->getProductosOfrecidos()) {
+			if (pp != nullptr && pp->getProducto() != nullptr && pp->getProducto()->getCodigo() == codigoProducto) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool AdminController::eliminarProducto(int codigo, bool eliminarAsociaciones) {
 	for (auto it = productos.begin(); it != productos.end(); ++it) {
 		Producto* p = *it;
 		if (p != nullptr && p->getCodigo() == codigo) {
+			// Si se solicita, eliminar las asociaciones con proveedores
+			if (eliminarAsociaciones) {
+				for (Proveedor* pr : proveedores) {
+					if (pr == nullptr) continue;
+					auto& ofrecidos = const_cast<vector<ProveedorProducto*>&>(pr->getProductosOfrecidos());
+					for (auto itPr = ofrecidos.begin(); itPr != ofrecidos.end(); ) {
+						if ((*itPr) != nullptr && (*itPr)->getProducto() != nullptr && (*itPr)->getProducto()->getCodigo() == codigo) {
+							delete *itPr;
+							itPr = ofrecidos.erase(itPr);
+						} else {
+							++itPr;
+						}
+					}
+				}
+			}
 			delete p;
 			productos.erase(it);
 			return true;
@@ -182,5 +237,52 @@ bool AdminController::modificarProveedor(const string& rut, const string& empres
 
 vector<Proveedor*> AdminController::listarProveedores() const {
 	return proveedores;
+}
+
+// -- Proveedor-Producto ------------------------------------------
+vector<Producto*> AdminController::listarProductosNoAsociadosAProveedor(const string& rutProveedor) const {
+	Proveedor* pr = buscarProveedor(rutProveedor);
+	if (pr == nullptr) return {};
+
+	vector<Producto*> noAsociados;
+	for (Producto* p : productos) {
+		if (p == nullptr) continue;
+		bool asociado = false;
+		for (ProveedorProducto* pp : pr->getProductosOfrecidos()) {
+			if (pp != nullptr && pp->getProducto() != nullptr && pp->getProducto()->getCodigo() == p->getCodigo()) {
+				asociado = true;
+				break;
+			}
+		}
+		if (!asociado) {
+			noAsociados.push_back(p);
+		}
+	}
+	return noAsociados;
+}
+
+ProveedorProducto* AdminController::buscarAsociacion(const string& rutProveedor, int codigoProducto) const {
+	Proveedor* pr = buscarProveedor(rutProveedor);
+	if (pr == nullptr) return nullptr;
+	for (ProveedorProducto* pp : pr->getProductosOfrecidos()) {
+		if (pp != nullptr && pp->getProducto() != nullptr && pp->getProducto()->getCodigo() == codigoProducto) {
+			return pp;
+		}
+	}
+	return nullptr;
+}
+
+bool AdminController::asociarProveedorProducto(const string& rutProveedor, int codigoProducto,
+											   int precioCompra, int tiempoEntrega) {
+	Proveedor* pr = buscarProveedor(rutProveedor);
+	Producto* p = buscarProducto(codigoProducto);
+	if (pr == nullptr || p == nullptr) return false;
+
+	// Si ya existe, no se crea de nuevo (la vista debe verificar antes)
+	if (buscarAsociacion(rutProveedor, codigoProducto) != nullptr) return false;
+
+	ProveedorProducto* pp = new ProveedorProducto(precioCompra, tiempoEntrega, p);
+	pr->addProveedorProducto(pp);
+	return true;
 }
 

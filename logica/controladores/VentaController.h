@@ -44,6 +44,9 @@ public:
 
 	// Calificaciones
 	bool calificarProducto(int codigoProducto, Puntaje puntaje, const string& comentario, DTFecha fecha);
+
+	// Verificaciones
+	bool productoEstaEnVentas(int codigoProducto) const;
 };
 
 #endif //PALABORATORIO2026_VENTACONTROLLER_H

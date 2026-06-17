@@ -31,9 +31,13 @@ public:
 
 	// -- Productos -------------------------------------------------
 	Producto* crearProducto(int codigo, const string& nombre, const string& descripcion,
-							 float precioVentaActual, int stock, float puntajePromedio);
+							 float precioVentaActual, int stock, int stockMinimo, const string& nombreCategoria);
 	Producto* buscarProducto(int codigo) const;
-	bool eliminarProducto(int codigo);
+	Producto* buscarProductoPorNombre(const string& nombre) const;
+	bool modificarProducto(int codigo, const string& nuevoNombre, const string& nuevaDescripcion,
+						   float nuevoPrecio, const string& nombreCategoria, int nuevoStockMinimo);
+	bool eliminarProducto(int codigo, bool eliminarAsociaciones = false);
+	bool productoAsociadoAProveedor(int codigoProducto) const;
 	vector<Producto*> listarProductos() const;
 
 	// -- Categorías -----------------------------------------------
@@ -59,8 +63,12 @@ public:
 	vector<Proveedor*> listarProveedores() const;
 	bool modificarProveedor(const string& rut, const string& empresa,
 							 const string& telefono, const string& contactoComercial);
+
+	// -- Proveedor-Producto --------------------------------------
+	vector<Producto*> listarProductosNoAsociadosAProveedor(const string& rutProveedor) const;
+	ProveedorProducto* buscarAsociacion(const string& rutProveedor, int codigoProducto) const;
+	bool asociarProveedorProducto(const string& rutProveedor, int codigoProducto,
+								  int precioCompra, int tiempoEntrega);
 };
 
 #endif //PALABORATORIO2026_ADMINCONTROLLER_H
-
-

@@ -25,5 +25,7 @@ public:
 
     static EmpleadoController* getInstanciaEmpleado();
     ~EmpleadoController();
+
+    bool productoEstaEnOrdenesPendientes(int codigoProducto) const;
 };
 #endif
