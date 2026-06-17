@@ -98,6 +98,18 @@ bool AdminController::asignarProductoACategoria(int codigoProducto, const string
 	return true;
 }
 
+bool AdminController::modificarCategoria(const string& nombreActual, const string& nuevoNombre, const string& nuevaDescripcion) {
+	Categoria* c = buscarCategoria(nombreActual);
+	if (c == nullptr) return false;
+
+	// Si se cambio el nombre, verificar que el nuevo no exista ya en otra categoria
+	if (nombreActual != nuevoNombre && buscarCategoria(nuevoNombre) != nullptr) return false;
+
+	c->setNombre(nuevoNombre);
+	c->setDescripcion(nuevaDescripcion);
+	return true;
+}
+
 // -- Empleados -----------------------------------------------
 Empleado* AdminController::crearEmpleado(const string& nombre, const string& correo,
 										 const string& contrasena, const string& rol) {

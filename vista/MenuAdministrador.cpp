@@ -95,19 +95,73 @@ void MenuAdministrador::menuCategorias() {
 		std::cout << "3. Buscar categoria por nombre\n";
 		std::cout << "4. Eliminar categoria\n";
 		std::cout << "5. Asignar producto a categoria\n";
+		std::cout << "6. Modificar categoria\n";
 		std::cout << "0. Volver\n";
 		int op;
 		std::cout << "Seleccione una opcion: ";
 		std::cin >> op;
 		if (op == 0) return;
-		if (op == 1) {
+	if (op == 1) {
+			// Listar categorias existentes
+			auto existentes = ctrl.listarCategorias();
+			std::cout << "\n--- Categorias existentes ---\n";
+			if (existentes.empty()) {
+				std::cout << "(No hay categorias registradas)\n";
+			} else {
+				for (auto c : existentes) {
+					if (c) std::cout << "- " << c->getNombre() << ": " << c->getDescripcion() << '\n';
+				}
+			}
+
 			std::string nombre;
 			std::string descripcion;
-			std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
-			std::cout << "Descripcion: "; std::getline(std::cin, descripcion);
-			auto c = ctrl.crearCategoria(nombre, descripcion);
-			std::cout << (c ? "Categoria creada." : "Error creando categoria.") << std::endl;
+
+			// Bucle para ingreso de datos con validacion de nombre unico
+			while (true) {
+				std::cout << "\n--- Nueva categoria ---\n";
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cout << "Nombre: "; std::getline(std::cin, nombre);
+				std::cout << "Descripcion: "; std::getline(std::cin, descripcion);
+
+				// Verificar si ya existe una categoria con ese nombre
+				if (ctrl.buscarCategoria(nombre) != nullptr) {
+					std::cout << "\nError: Ya existe una categoria con el nombre '" << nombre << "'." << std::endl;
+					std::cout << "1. Reingresar los datos\n";
+					std::cout << "2. Cancelar\n";
+					int opcionError;
+					std::cout << "Seleccione una opcion: ";
+					std::cin >> opcionError;
+					if (opcionError == 2) {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					continue;
+				}
+
+				// Mostrar resumen y confirmar
+				std::cout << "\n--- Resumen de datos ingresados ---\n";
+				std::cout << "Nombre: " << nombre << "\n";
+				std::cout << "Descripcion: " << descripcion << "\n";
+				std::cout << "1. Confirmar\n";
+				std::cout << "2. Cancelar\n";
+				int opcionConfirmar;
+				std::cout << "Seleccione una opcion: ";
+				std::cin >> opcionConfirmar;
+				if (opcionConfirmar == 1) {
+					auto c = ctrl.crearCategoria(nombre, descripcion);
+					if (c) {
+						std::cout << "Categoria creada exitosamente." << std::endl;
+					} else {
+						std::cout << "Error al crear la categoria." << std::endl;
+					}
+					break;
+				} else {
+					std::cout << "Operacion cancelada." << std::endl;
+					break;
+				}
+			}
 		} else if (op == 2) {
+
 			auto lista = ctrl.listarCategorias();
 			std::cout << "Categorias:\n";
 			for (auto c : lista) {
@@ -131,6 +185,97 @@ void MenuAdministrador::menuCategorias() {
 			std::cout << "Nombre categoria: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombreCategoria);
 			bool ok = ctrl.asignarProductoACategoria(codigo, nombreCategoria);
 			std::cout << (ok ? "Producto asignado." : "No se pudo asignar.") << std::endl;
+		} else if (op == 6) {
+			// Listar todas las categorias
+			auto todas = ctrl.listarCategorias();
+			if (todas.empty()) {
+				std::cout << "\nNo hay categorias registradas para modificar.\n";
+			} else {
+				std::cout << "\n--- Categorias existentes ---\n";
+				for (auto c : todas) {
+					if (c) std::cout << "- " << c->getNombre() << ": " << c->getDescripcion() << '\n';
+				}
+
+				std::string nombreActual;
+				Categoria* cat = nullptr;
+
+				// Bucle para seleccionar categoria a modificar
+				while (true) {
+					std::cout << "\nIngrese el nombre de la categoria a modificar (0 para cancelar): ";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::getline(std::cin, nombreActual);
+					if (nombreActual == "0") {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					cat = ctrl.buscarCategoria(nombreActual);
+					if (cat == nullptr) {
+						std::cout << "Error: No existe una categoria con el nombre '" << nombreActual << "'." << std::endl;
+						std::cout << "1. Reingresar el nombre\n";
+						std::cout << "2. Cancelar\n";
+						int opcionError;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionError;
+						if (opcionError == 2) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+						continue;
+					}
+
+					// Mostrar datos actuales
+					std::cout << "\n--- Datos actuales de la categoria ---\n";
+					std::cout << "Nombre: " << cat->getNombre() << "\n";
+					std::cout << "Descripcion: " << cat->getDescripcion() << "\n";
+
+					std::string nuevoNombre;
+					std::string nuevaDescripcion;
+
+					// Bucle para ingreso de nuevos datos con validacion
+					while (true) {
+						std::cout << "\n--- Nuevos datos ---\n";
+						std::cout << "Nuevo nombre: "; std::getline(std::cin, nuevoNombre);
+						std::cout << "Nueva descripcion: "; std::getline(std::cin, nuevaDescripcion);
+
+						// Verificar si el nuevo nombre ya existe en otra categoria
+						if (nuevoNombre != nombreActual && ctrl.buscarCategoria(nuevoNombre) != nullptr) {
+							std::cout << "\nError: Ya existe otra categoria con el nombre '" << nuevoNombre << "'." << std::endl;
+							std::cout << "1. Reingresar los datos\n";
+							std::cout << "2. Cancelar\n";
+							int opcionError;
+							std::cout << "Seleccione una opcion: ";
+							std::cin >> opcionError;
+							std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+							if (opcionError == 2) {
+								std::cout << "Operacion cancelada." << std::endl;
+								break;
+							}
+							continue;
+						}
+
+						// Mostrar resumen y confirmar
+						std::cout << "\n--- Resumen de la modificacion ---\n";
+						std::cout << "Nombre anterior: " << nombreActual << "\n";
+						std::cout << "Nombre nuevo: " << nuevoNombre << "\n";
+						std::cout << "Descripcion anterior: " << cat->getDescripcion() << "\n";
+						std::cout << "Descripcion nueva: " << nuevaDescripcion << "\n";
+						std::cout << "1. Confirmar\n";
+						std::cout << "2. Cancelar\n";
+						int opcionConfirmar;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionConfirmar;
+						if (opcionConfirmar == 1) {
+							bool ok = ctrl.modificarCategoria(nombreActual, nuevoNombre, nuevaDescripcion);
+							std::cout << (ok ? "Categoria modificada exitosamente." : "Error al modificar la categoria.") << std::endl;
+							break;
+						} else {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+					}
+					break;
+				}
+			}
 		} else {
 			std::cout << "Opcion invalida." << std::endl;
 		}
