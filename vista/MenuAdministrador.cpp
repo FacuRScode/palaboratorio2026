@@ -393,6 +393,7 @@ void MenuAdministrador::menuProveedores() {
 		std::cout << "2. Listar proveedores\n";
 		std::cout << "3. Buscar proveedor por RUT\n";
 		std::cout << "4. Eliminar proveedor por RUT\n";
+		std::cout << "5. Modificar proveedor\n";
 		std::cout << "0. Volver\n";
 		int op;
 		std::cout << "Seleccione una opcion: ";
@@ -403,12 +404,53 @@ void MenuAdministrador::menuProveedores() {
 			std::string empresa;
 			std::string telefono;
 			std::string contacto;
-			std::cout << "RUT: "; std::cin >> rut;
-			std::cout << "Empresa: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, empresa);
-			std::cout << "Telefono: "; std::getline(std::cin, telefono);
-			std::cout << "Contacto comercial: "; std::getline(std::cin, contacto);
-			auto p = ctrl.crearProveedor(rut, empresa, telefono, contacto);
-			std::cout << (p ? "Proveedor creado." : "Error creando proveedor.") << std::endl;
+			bool datosValidos = false;
+			while (!datosValidos) {
+				std::cout << "\n--- Alta de proveedor ---\n";
+				std::cout << "RUT: "; std::cin >> rut;
+				std::cout << "Empresa: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, empresa);
+				std::cout << "Telefono: "; std::getline(std::cin, telefono);
+				std::cout << "Contacto comercial: "; std::getline(std::cin, contacto);
+
+				// Verificar si el RUT ya esta registrado
+				if (ctrl.buscarProveedor(rut) != nullptr) {
+					std::cout << "\nError: Ya existe un proveedor registrado con el RUT '" << rut << "'." << std::endl;
+					std::cout << "1. Reingresar los datos\n";
+					std::cout << "2. Cancelar\n";
+					int opcionError;
+					std::cout << "Seleccione una opcion: ";
+					std::cin >> opcionError;
+					if (opcionError == 2) {
+						std::cout << "Operacion cancelada." << std::endl;
+						break; // Sale del bucle de ingreso, vuelve al menu de proveedores
+					}
+					continue; // Reintentar ingreso de datos
+				}
+
+				// Mostrar resumen y confirmar
+				std::cout << "\n--- Resumen de datos ingresados ---\n";
+				std::cout << "RUT: " << rut << "\n";
+				std::cout << "Empresa: " << empresa << "\n";
+				std::cout << "Telefono: " << telefono << "\n";
+				std::cout << "Contacto comercial: " << contacto << "\n";
+				std::cout << "1. Confirmar\n";
+				std::cout << "2. Cancelar\n";
+				int opcionConfirmar;
+				std::cout << "Seleccione una opcion: ";
+				std::cin >> opcionConfirmar;
+				if (opcionConfirmar == 1) {
+					auto p = ctrl.crearProveedor(rut, empresa, telefono, contacto);
+					if (p) {
+						std::cout << "Proveedor creado exitosamente." << std::endl;
+					} else {
+						std::cout << "Error al crear el proveedor." << std::endl;
+					}
+					datosValidos = true;
+				} else {
+					std::cout << "Operacion cancelada." << std::endl;
+					datosValidos = true;
+				}
+			}
 		} else if (op == 2) {
 			auto lista = ctrl.listarProveedores();
 			std::cout << "Proveedores:\n";
@@ -426,6 +468,84 @@ void MenuAdministrador::menuProveedores() {
 			std::cout << "RUT: "; std::cin >> rut;
 			bool ok = ctrl.eliminarProveedor(rut);
 			std::cout << (ok ? "Proveedor eliminado." : "No se pudo eliminar.") << std::endl;
+		} else if (op == 5) {
+			// Listar todos los proveedores
+			auto todos = ctrl.listarProveedores();
+			if (todos.empty()) {
+				std::cout << "\nNo hay proveedores registrados para modificar.\n";
+			} else {
+				std::cout << "\n--- Proveedores existentes ---\n";
+				for (auto pr : todos) {
+					if (pr) std::cout << "- " << pr->getRut() << " - " << pr->getEmpresa() << '\n';
+				}
+
+				std::string rut;
+				Proveedor* prov = nullptr;
+
+				// Bucle para seleccionar proveedor a modificar
+				while (true) {
+					std::cout << "\nIngrese el RUT del proveedor a modificar (0 para cancelar): ";
+					std::cin >> rut;
+					if (rut == "0") {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					prov = ctrl.buscarProveedor(rut);
+					if (prov == nullptr) {
+						std::cout << "Error: No existe un proveedor con el RUT '" << rut << "'." << std::endl;
+						std::cout << "1. Reingresar el RUT\n";
+						std::cout << "2. Cancelar\n";
+						int opcionError;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionError;
+						if (opcionError == 2) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+						continue;
+					}
+
+					// Mostrar datos actuales
+					std::cout << "\n--- Datos actuales del proveedor ---\n";
+					std::cout << "RUT: " << prov->getRut() << " (no modificable)\n";
+					std::cout << "Empresa: " << prov->getEmpresa() << "\n";
+					std::cout << "Telefono: " << prov->getTelefono() << "\n";
+					std::cout << "Contacto comercial: " << prov->getContactoComercial() << "\n";
+
+					std::string nuevaEmpresa;
+					std::string nuevoTelefono;
+					std::string nuevoContacto;
+
+					// Ingreso de nuevos datos
+					std::cout << "\n--- Nuevos datos del proveedor ---\n";
+					std::cout << "Nueva empresa: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nuevaEmpresa);
+					std::cout << "Nuevo telefono: "; std::getline(std::cin, nuevoTelefono);
+					std::cout << "Nuevo contacto comercial: "; std::getline(std::cin, nuevoContacto);
+
+					// Mostrar resumen y confirmar
+					std::cout << "\n--- Resumen de la modificacion ---\n";
+					std::cout << "RUT: " << rut << " (no modificable)\n";
+					std::cout << "Empresa anterior: " << prov->getEmpresa() << "\n";
+					std::cout << "Empresa nueva: " << nuevaEmpresa << "\n";
+					std::cout << "Telefono anterior: " << prov->getTelefono() << "\n";
+					std::cout << "Telefono nuevo: " << nuevoTelefono << "\n";
+					std::cout << "Contacto anterior: " << prov->getContactoComercial() << "\n";
+					std::cout << "Contacto nuevo: " << nuevoContacto << "\n";
+					std::cout << "1. Confirmar\n";
+					std::cout << "2. Cancelar\n";
+					int opcionConfirmar;
+					std::cout << "Seleccione una opcion: ";
+					std::cin >> opcionConfirmar;
+					if (opcionConfirmar == 1) {
+						bool ok = ctrl.modificarProveedor(rut, nuevaEmpresa, nuevoTelefono, nuevoContacto);
+						std::cout << (ok ? "Proveedor modificado exitosamente." : "Error al modificar el proveedor.") << std::endl;
+						break;
+					} else {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+				}
+			}
 		} else {
 			std::cout << "Opcion invalida." << std::endl;
 		}

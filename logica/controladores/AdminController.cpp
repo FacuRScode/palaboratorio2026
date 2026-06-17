@@ -170,6 +170,16 @@ bool AdminController::eliminarProveedor(const string& rut) {
 	return false;
 }
 
+bool AdminController::modificarProveedor(const string& rut, const string& empresa,
+										const string& telefono, const string& contactoComercial) {
+	Proveedor* pr = buscarProveedor(rut);
+	if (pr == nullptr) return false;
+	pr->setEmpresa(empresa);
+	pr->setTelefono(telefono);
+	pr->setContactoComercial(contactoComercial);
+	return true;
+}
+
 vector<Proveedor*> AdminController::listarProveedores() const {
 	return proveedores;
 }
