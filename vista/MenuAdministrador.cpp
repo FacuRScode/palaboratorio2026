@@ -6,7 +6,9 @@
 #include "MenuAdministrador.h"
 #include <limits>
 
-MenuAdministrador::MenuAdministrador(AdminController& controller, AuthController* auth) : ctrl(controller), authCtrl(auth) {}
+MenuAdministrador::MenuAdministrador(AdminController& controller, AuthController* auth,
+									 VentaController* ventas, EmpleadoController* empleados)
+	: ctrl(controller), authCtrl(auth), ventaCtrl(ventas), empleadoCtrl(empleados) {}
 
 void MenuAdministrador::mostrar() {
 	while (true) {
@@ -44,6 +46,7 @@ void MenuAdministrador::menuProductos() {
 		std::cout << "2. Listar productos\n";
 		std::cout << "3. Buscar producto por codigo\n";
 		std::cout << "4. Eliminar producto por codigo\n";
+		std::cout << "5. Modificar producto\n";
 		std::cout << "0. Volver\n";
 		int op;
 		std::cout << "Seleccione una opcion: ";
@@ -55,15 +58,81 @@ void MenuAdministrador::menuProductos() {
 			std::string descripcion;
 			float precio;
 			int stock;
-			float puntaje;
-			std::cout << "Codigo: "; std::cin >> codigo;
-			std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
-			std::cout << "Descripcion: "; std::getline(std::cin, descripcion);
-			std::cout << "Precio venta actual: "; std::cin >> precio;
-			std::cout << "Stock: "; std::cin >> stock;
-			std::cout << "Puntaje promedio: "; std::cin >> puntaje;
-			Producto* p = ctrl.crearProducto(codigo, nombre, descripcion, precio, stock, puntaje);
-			if (p) std::cout << "Producto creado." << std::endl; else std::cout << "Error creando producto." << std::endl;
+			int stockMinimo;
+			bool datosValidos = false;
+
+			while (!datosValidos) {
+				std::cout << "\n--- Alta de producto ---\n";
+				std::cout << "Codigo: "; std::cin >> codigo;
+				std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
+				std::cout << "Descripcion: "; std::getline(std::cin, descripcion);
+				std::cout << "Precio de venta unitario: "; std::cin >> precio;
+
+				// Verificar si el codigo ya existe
+				if (ctrl.buscarProducto(codigo) != nullptr) {
+					std::cout << "\nError: Ya existe un producto con el codigo '" << codigo << "'." << std::endl;
+					std::cout << "1. Reingresar los datos\n";
+					std::cout << "2. Cancelar\n";
+					int opcionError;
+					std::cout << "Seleccione una opcion: ";
+					std::cin >> opcionError;
+					if (opcionError == 2) {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					continue;
+				}
+
+				// Listar categorias existentes y seleccionar una
+				auto categorias = ctrl.listarCategorias();
+				if (categorias.empty()) {
+					std::cout << "\nError: No hay categorias registradas. Debe crear una categoria antes de agregar un producto." << std::endl;
+					break;
+				}
+
+				std::cout << "\n--- Categorias disponibles ---\n";
+				for (size_t i = 0; i < categorias.size(); ++i) {
+					if (categorias[i]) std::cout << (i + 1) << ". " << categorias[i]->getNombre() << ": " << categorias[i]->getDescripcion() << '\n';
+				}
+
+				int opcionCategoria;
+				std::cout << "Seleccione una categoria (1-" << categorias.size() << "): ";
+				std::cin >> opcionCategoria;
+				if (opcionCategoria < 1 || opcionCategoria > (int)categorias.size()) {
+					std::cout << "Opcion invalida. Operacion cancelada." << std::endl;
+					break;
+				}
+
+				std::cout << "Stock inicial: "; std::cin >> stock;
+				std::cout << "Stock minimo para alertas de reposicion: "; std::cin >> stockMinimo;
+
+				// Mostrar resumen y confirmar
+				std::cout << "\n--- Resumen de datos ingresados ---\n";
+				std::cout << "Codigo: " << codigo << "\n";
+				std::cout << "Nombre: " << nombre << "\n";
+				std::cout << "Descripcion: " << descripcion << "\n";
+				std::cout << "Precio de venta unitario: " << precio << "\n";
+				std::cout << "Categoria: " << categorias[opcionCategoria - 1]->getNombre() << "\n";
+				std::cout << "Stock inicial: " << stock << "\n";
+				std::cout << "Stock minimo: " << stockMinimo << "\n";
+				std::cout << "1. Confirmar\n";
+				std::cout << "2. Cancelar\n";
+				int opcionConfirmar;
+				std::cout << "Seleccione una opcion: ";
+				std::cin >> opcionConfirmar;
+				if (opcionConfirmar == 1) {
+					Producto* p = ctrl.crearProducto(codigo, nombre, descripcion, precio, stock, stockMinimo, categorias[opcionCategoria - 1]->getNombre());
+					if (p) {
+						std::cout << "Producto creado exitosamente." << std::endl;
+					} else {
+						std::cout << "Error al crear el producto." << std::endl;
+					}
+					datosValidos = true;
+				} else {
+					std::cout << "Operacion cancelada." << std::endl;
+					datosValidos = true;
+				}
+			}
 		} else if (op == 2) {
 			auto lista = ctrl.listarProductos();
 			std::cout << "Productos:\n";
@@ -77,10 +146,223 @@ void MenuAdministrador::menuProductos() {
 			if (p) std::cout << "Encontrado: " << p->getNombre() << " (codigo=" << p->getCodigo() << ")\n";
 			else std::cout << "Producto no encontrado." << std::endl;
 		} else if (op == 4) {
-			int codigo;
-			std::cout << "Codigo: "; std::cin >> codigo;
-			bool ok = ctrl.eliminarProducto(codigo);
-			std::cout << (ok ? "Producto eliminado." : "No se pudo eliminar.") << std::endl;
+			// Listar productos que no tienen ventas ni ordenes de compra pendientes
+			auto todos = ctrl.listarProductos();
+			vector<Producto*> eliminables;
+			for (auto p : todos) {
+				if (p == nullptr) continue;
+				bool tieneVentas = ventaCtrl ? ventaCtrl->productoEstaEnVentas(p->getCodigo()) : false;
+				bool tieneOrdenesPendientes = empleadoCtrl ? empleadoCtrl->productoEstaEnOrdenesPendientes(p->getCodigo()) : false;
+				if (!tieneVentas && !tieneOrdenesPendientes) {
+					eliminables.push_back(p);
+				}
+			}
+
+			if (eliminables.empty()) {
+				std::cout << "\nNo hay productos que puedan eliminarse. Todos tienen ventas u ordenes de compra pendientes asociadas.\n";
+			} else {
+				std::cout << "\n--- Productos que pueden eliminarse (sin ventas ni ordenes pendientes) ---\n";
+				for (auto p : eliminables) {
+					if (p) {
+						std::cout << "- codigo=" << p->getCodigo() << " nombre=" << p->getNombre() << '\n';
+					}
+				}
+
+				int codigo;
+				Producto* prod = nullptr;
+
+				// Bucle para seleccionar producto a eliminar
+				while (true) {
+					std::cout << "\nIngrese el codigo del producto a eliminar (0 para cancelar): ";
+					std::cin >> codigo;
+					if (codigo == 0) {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					prod = ctrl.buscarProducto(codigo);
+					if (prod == nullptr) {
+						std::cout << "Error: No existe un producto con el codigo '" << codigo << "'." << std::endl;
+						std::cout << "1. Reingresar el codigo\n";
+						std::cout << "2. Cancelar\n";
+						int opcionError;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionError;
+						if (opcionError == 2) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+						continue;
+					}
+
+					// Verificar que el producto siga siendo eliminable
+					bool tieneVentas = ventaCtrl ? ventaCtrl->productoEstaEnVentas(codigo) : false;
+					bool tieneOrdenesPendientes = empleadoCtrl ? empleadoCtrl->productoEstaEnOrdenesPendientes(codigo) : false;
+					if (tieneVentas || tieneOrdenesPendientes) {
+						std::cout << "\nError: El producto tiene ventas u ordenes de compra pendientes asociadas y no puede eliminarse.\n";
+						break;
+					}
+
+					// Mostrar datos del producto seleccionado
+					std::cout << "\n--- Datos del producto a eliminar ---\n";
+					std::cout << "Codigo: " << prod->getCodigo() << "\n";
+					std::cout << "Nombre: " << prod->getNombre() << "\n";
+					std::cout << "Descripcion: " << prod->getDescripcion() << "\n";
+					std::cout << "Precio de venta unitario: " << prod->getPrecioVentaActual() << "\n";
+					std::cout << "Stock actual: " << prod->getStock() << "\n";
+					std::string catActual = prod->getCategoria() ? prod->getCategoria()->getNombre() : "(sin categoria)";
+					std::cout << "Categoria: " << catActual << "\n";
+
+					// Verificar si tiene asociaciones con proveedores
+					bool asociadoProveedor = ctrl.productoAsociadoAProveedor(codigo);
+					if (asociadoProveedor) {
+						std::cout << "(Tiene asociaciones con proveedores que seran eliminadas)\n";
+					}
+
+					std::cout << "\n1. Confirmar eliminacion\n";
+					std::cout << "2. Cancelar\n";
+					int opcionConfirmar;
+					std::cout << "Seleccione una opcion: ";
+					std::cin >> opcionConfirmar;
+					if (opcionConfirmar == 1) {
+						bool ok = ctrl.eliminarProducto(codigo, true);
+						std::cout << (ok ? "Producto eliminado exitosamente junto con sus asociaciones." : "Error al eliminar el producto.") << std::endl;
+						break;
+					} else {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+				}
+			}
+		} else if (op == 5) {
+			// Listar todos los productos
+			auto todos = ctrl.listarProductos();
+			if (todos.empty()) {
+				std::cout << "\nNo hay productos registrados para modificar.\n";
+			} else {
+				std::cout << "\n--- Productos existentes ---\n";
+				for (auto p : todos) {
+					if (p) {
+						std::string catNombre = p->getCategoria() ? p->getCategoria()->getNombre() : "(sin categoria)";
+						std::cout << "- codigo=" << p->getCodigo() << " nombre=" << p->getNombre() << " categoria=" << catNombre << '\n';
+					}
+				}
+
+				int codigo;
+				Producto* prod = nullptr;
+
+				// Bucle para seleccionar producto a modificar
+				while (true) {
+					std::cout << "\nIngrese el codigo del producto a modificar (0 para cancelar): ";
+					std::cin >> codigo;
+					if (codigo == 0) {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					prod = ctrl.buscarProducto(codigo);
+					if (prod == nullptr) {
+						std::cout << "Error: No existe un producto con el codigo '" << codigo << "'." << std::endl;
+						std::cout << "1. Reingresar el codigo\n";
+						std::cout << "2. Cancelar\n";
+						int opcionError;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionError;
+						if (opcionError == 2) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+						continue;
+					}
+
+					// Mostrar datos actuales
+					std::string catActual = prod->getCategoria() ? prod->getCategoria()->getNombre() : "(sin categoria)";
+					std::cout << "\n--- Datos actuales del producto (codigo=" << prod->getCodigo() << ") ---\n";
+					std::cout << "Codigo: " << prod->getCodigo() << " (no modificable)\n";
+					std::cout << "Nombre: " << prod->getNombre() << "\n";
+					std::cout << "Descripcion: " << prod->getDescripcion() << "\n";
+					std::cout << "Precio de venta unitario: " << prod->getPrecioVentaActual() << "\n";
+					std::cout << "Categoria: " << catActual << "\n";
+					std::cout << "Stock minimo: " << prod->getStockMinimo() << "\n";
+
+					std::string nuevoNombre;
+					std::string nuevaDescripcion;
+					float nuevoPrecio;
+					int nuevoStockMinimo;
+
+					// Bucle para ingreso de nuevos datos con validacion
+					while (true) {
+						std::cout << "\n--- Nuevos datos del producto ---\n";
+						std::cout << "Nuevo nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nuevoNombre);
+						std::cout << "Nueva descripcion: "; std::getline(std::cin, nuevaDescripcion);
+						std::cout << "Nuevo precio de venta unitario: "; std::cin >> nuevoPrecio;
+
+						// Verificar si el nuevo nombre ya pertenece a otro producto
+						Producto* existente = ctrl.buscarProductoPorNombre(nuevoNombre);
+						if (existente != nullptr && existente->getCodigo() != codigo) {
+							std::cout << "\nError: Ya existe otro producto con el nombre '" << nuevoNombre << "'." << std::endl;
+							std::cout << "1. Reingresar los datos\n";
+							std::cout << "2. Cancelar\n";
+							int opcionError;
+							std::cout << "Seleccione una opcion: ";
+							std::cin >> opcionError;
+							if (opcionError == 2) {
+								std::cout << "Operacion cancelada." << std::endl;
+								break;
+							}
+							continue;
+						}
+
+						// Listar categorias disponibles
+						auto categorias = ctrl.listarCategorias();
+						if (categorias.empty()) {
+							std::cout << "\nError: No hay categorias registradas. No se puede modificar el producto sin una categoria." << std::endl;
+							break;
+						}
+
+						std::cout << "\n--- Categorias disponibles ---\n";
+						for (size_t i = 0; i < categorias.size(); ++i) {
+							if (categorias[i]) std::cout << (i + 1) << ". " << categorias[i]->getNombre() << ": " << categorias[i]->getDescripcion() << '\n';
+						}
+
+						int opcionCategoria;
+						std::cout << "Seleccione la nueva categoria (1-" << categorias.size() << "): ";
+						std::cin >> opcionCategoria;
+						if (opcionCategoria < 1 || opcionCategoria > (int)categorias.size()) {
+							std::cout << "Opcion invalida. Operacion cancelada." << std::endl;
+							break;
+						}
+
+						std::cout << "Nuevo stock minimo para alertas de reposicion: "; std::cin >> nuevoStockMinimo;
+
+						// Mostrar resumen y confirmar
+						std::cout << "\n--- Resumen de la modificacion ---\n";
+						std::cout << "Codigo: " << codigo << " (no modificable)\n";
+						std::cout << "Nombre anterior: " << prod->getNombre() << "\n";
+						std::cout << "Nombre nuevo: " << nuevoNombre << "\n";
+						std::cout << "Descripcion anterior: " << prod->getDescripcion() << "\n";
+						std::cout << "Descripcion nueva: " << nuevaDescripcion << "\n";
+						std::cout << "Precio anterior: " << prod->getPrecioVentaActual() << "\n";
+						std::cout << "Precio nuevo: " << nuevoPrecio << "\n";
+						std::cout << "Categoria anterior: " << catActual << "\n";
+						std::cout << "Categoria nueva: " << categorias[opcionCategoria - 1]->getNombre() << "\n";
+						std::cout << "Stock minimo anterior: " << prod->getStockMinimo() << "\n";
+						std::cout << "Stock minimo nuevo: " << nuevoStockMinimo << "\n";
+						std::cout << "1. Confirmar\n";
+						std::cout << "2. Cancelar\n";
+						int opcionConfirmar;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionConfirmar;
+						if (opcionConfirmar == 1) {
+							bool ok = ctrl.modificarProducto(codigo, nuevoNombre, nuevaDescripcion, nuevoPrecio, categorias[opcionCategoria - 1]->getNombre(), nuevoStockMinimo);
+							std::cout << (ok ? "Producto modificado exitosamente." : "Error al modificar el producto.") << std::endl;
+							break;
+						} else {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+					}
+					break;
+				}
+			}
 		} else {
 			std::cout << "Opcion invalida." << std::endl;
 		}
@@ -394,6 +676,7 @@ void MenuAdministrador::menuProveedores() {
 		std::cout << "3. Buscar proveedor por RUT\n";
 		std::cout << "4. Eliminar proveedor por RUT\n";
 		std::cout << "5. Modificar proveedor\n";
+		std::cout << "6. Asociar producto a proveedor\n";
 		std::cout << "0. Volver\n";
 		int op;
 		std::cout << "Seleccione una opcion: ";
@@ -544,6 +827,169 @@ void MenuAdministrador::menuProveedores() {
 						std::cout << "Operacion cancelada." << std::endl;
 						break;
 					}
+				}
+			}
+		} else if (op == 6) {
+			// Asociar producto a proveedor
+			auto todosProv = ctrl.listarProveedores();
+			if (todosProv.empty()) {
+				std::cout << "\nNo hay proveedores registrados. Debe crear un proveedor primero.\n";
+			} else {
+				std::cout << "\n--- Proveedores registrados ---\n";
+				for (auto pr : todosProv) {
+					if (pr) std::cout << "- " << pr->getRut() << " - " << pr->getEmpresa() << '\n';
+				}
+
+				std::string rut;
+				Proveedor* prov = nullptr;
+
+				// Bucle para seleccionar proveedor
+				while (true) {
+					std::cout << "\nIngrese el RUT del proveedor (0 para cancelar): ";
+					std::cin >> rut;
+					if (rut == "0") {
+						std::cout << "Operacion cancelada." << std::endl;
+						break;
+					}
+					prov = ctrl.buscarProveedor(rut);
+					if (prov == nullptr) {
+						std::cout << "Error: No existe un proveedor con el RUT '" << rut << "'." << std::endl;
+						std::cout << "1. Reingresar el RUT\n";
+						std::cout << "2. Cancelar\n";
+						int opcionError;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionError;
+						if (opcionError == 2) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+						continue;
+					}
+
+					// Listar productos no asociados a este proveedor
+					auto noAsociados = ctrl.listarProductosNoAsociadosAProveedor(rut);
+					if (noAsociados.empty()) {
+						std::cout << "\nTodos los productos del catalogo ya estan asociados a este proveedor.\n";
+						break;
+					}
+
+					std::cout << "\n--- Productos disponibles (no asociados a " << prov->getEmpresa() << ") ---\n";
+					for (auto p : noAsociados) {
+						if (p) std::cout << "- codigo=" << p->getCodigo() << " nombre=" << p->getNombre() << '\n';
+					}
+
+					int codigoProducto;
+					Producto* prod = nullptr;
+
+					// Bucle para seleccionar producto
+					while (true) {
+						std::cout << "\nIngrese el codigo del producto (0 para cancelar): ";
+						std::cin >> codigoProducto;
+						if (codigoProducto == 0) {
+							std::cout << "Operacion cancelada." << std::endl;
+							break;
+						}
+						prod = ctrl.buscarProducto(codigoProducto);
+						if (prod == nullptr) {
+							std::cout << "Error: No existe un producto con el codigo '" << codigoProducto << "'." << std::endl;
+							std::cout << "1. Reingresar el codigo\n";
+							std::cout << "2. Cancelar\n";
+							int opcionError;
+							std::cout << "Seleccione una opcion: ";
+							std::cin >> opcionError;
+							if (opcionError == 2) {
+								std::cout << "Operacion cancelada." << std::endl;
+								break;
+							}
+							continue;
+						}
+
+						// Verificar si el producto está en la lista de no asociados
+						bool encontrado = false;
+						for (auto p : noAsociados) {
+							if (p != nullptr && p->getCodigo() == codigoProducto) {
+								encontrado = true;
+								break;
+							}
+						}
+						if (!encontrado) {
+							std::cout << "\nError: El producto con codigo '" << codigoProducto << "' ya esta asociado a este proveedor.\n";
+							break;
+						}
+
+						// Verificar si ya existe la asociacion (doble comprobacion)
+						ProveedorProducto* existente = ctrl.buscarAsociacion(rut, codigoProducto);
+						if (existente != nullptr) {
+							std::cout << "\nLa combinacion proveedor-producto ya existe.\n";
+							std::cout << "Precio de compra actual: " << existente->getPrecioCompraPactado() << "\n";
+							std::cout << "Tiempo de entrega actual: " << existente->getTiempoEntregaEstimadoEnDias() << " dias\n";
+							std::cout << "1. Actualizar precio y tiempo de entrega\n";
+							std::cout << "2. Cancelar\n";
+							int opcionExistente;
+							std::cout << "Seleccione una opcion: ";
+							std::cin >> opcionExistente;
+							if (opcionExistente == 2) {
+								std::cout << "Operacion cancelada." << std::endl;
+								break;
+							}
+							// Actualizar datos existentes
+							int nuevoPrecio;
+							int nuevoTiempo;
+							std::cout << "Nuevo precio de compra pactado: ";
+							std::cin >> nuevoPrecio;
+							std::cout << "Nuevo tiempo de entrega estimado (dias): ";
+							std::cin >> nuevoTiempo;
+
+							std::cout << "\n--- Resumen de la actualizacion ---\n";
+							std::cout << "Proveedor: " << prov->getEmpresa() << " (" << rut << ")\n";
+							std::cout << "Producto: " << prod->getNombre() << " (codigo=" << codigoProducto << ")\n";
+							std::cout << "Precio anterior: " << existente->getPrecioCompraPactado() << "\n";
+							std::cout << "Precio nuevo: " << nuevoPrecio << "\n";
+							std::cout << "Tiempo anterior: " << existente->getTiempoEntregaEstimadoEnDias() << " dias\n";
+							std::cout << "Tiempo nuevo: " << nuevoTiempo << " dias\n";
+							std::cout << "1. Confirmar\n";
+							std::cout << "2. Cancelar\n";
+							int opcionConfirmar;
+							std::cout << "Seleccione una opcion: ";
+							std::cin >> opcionConfirmar;
+							if (opcionConfirmar == 1) {
+								existente->setPrecioCompraPactado(nuevoPrecio);
+								existente->setTiempoEntregaEstimadoEnDias(nuevoTiempo);
+								std::cout << "Asociacion actualizada exitosamente." << std::endl;
+							} else {
+								std::cout << "Operacion cancelada." << std::endl;
+							}
+							break;
+						}
+
+						// No existe la asociacion, solicitar datos para crearla
+						int precioCompra;
+						int tiempoEntrega;
+						std::cout << "\nPrecio de compra pactado: ";
+						std::cin >> precioCompra;
+						std::cout << "Tiempo de entrega estimado (dias): ";
+						std::cin >> tiempoEntrega;
+
+						// Mostrar resumen y confirmar
+						std::cout << "\n--- Resumen de la asociacion ---\n";
+						std::cout << "Proveedor: " << prov->getEmpresa() << " (" << rut << ")\n";
+						std::cout << "Producto: " << prod->getNombre() << " (codigo=" << codigoProducto << ")\n";
+						std::cout << "Precio de compra pactado: " << precioCompra << "\n";
+						std::cout << "Tiempo de entrega estimado: " << tiempoEntrega << " dias\n";
+						std::cout << "1. Confirmar\n";
+						std::cout << "2. Cancelar\n";
+						int opcionConfirmar;
+						std::cout << "Seleccione una opcion: ";
+						std::cin >> opcionConfirmar;
+						if (opcionConfirmar == 1) {
+							bool ok = ctrl.asociarProveedorProducto(rut, codigoProducto, precioCompra, tiempoEntrega);
+							std::cout << (ok ? "Asociacion registrada exitosamente." : "Error al registrar la asociacion.") << std::endl;
+						} else {
+							std::cout << "Operacion cancelada." << std::endl;
+						}
+						break;
+					}
+					break;
 				}
 			}
 		} else {

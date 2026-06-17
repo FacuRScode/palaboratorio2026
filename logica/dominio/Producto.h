@@ -7,18 +7,19 @@
 using namespace std;
 class Producto{
 private:
-    int codigo, stock;
+    int codigo, stock, stockMinimo;
     string nombre, descripcion;
     float precioVentaActual, puntajePromedio;
     Categoria* categoria;
 public:
-    Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, float puntajePromedio, Categoria* categoria);
+    Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, int stockMinimo, float puntajePromedio, Categoria* categoria);
 
     int getCodigo();
     string getNombre();
     string getDescripcion();
     float getPrecioVentaActual();
     int getStock();
+    int getStockMinimo();
     float getPuntajePromedio();
     Categoria* getCategoria();
 
@@ -27,6 +28,7 @@ public:
     void setDescripcion(string descripcion);
     void setPrecioVentaActual(float precioVentaActual);
     void setStock(int stock);
+    void setStockMinimo(int stockMinimo);
     void setPuntajePromedio(float puntajePromedio);
     void setCategoria(Categoria* categoria);
 };

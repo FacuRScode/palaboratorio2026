@@ -1,12 +1,13 @@
 #include "Producto.h"
 
 using namespace std;
-Producto::Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, float puntajePromedio, Categoria* categoria) {
+Producto::Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, int stockMinimo, float puntajePromedio, Categoria* categoria) {
     this->codigo = codigo;
     this->nombre = nombre;
     this->descripcion = descripcion;
     this->precioVentaActual = precioVentaActual;
     this->stock = stock;
+    this->stockMinimo = stockMinimo;
     this->categoria = categoria;
     this->puntajePromedio = puntajePromedio;
 }
@@ -24,6 +25,9 @@ float Producto::getPrecioVentaActual() {
 }
 int Producto::getStock() {
     return this->stock;
+}
+int Producto::getStockMinimo() {
+    return this->stockMinimo;
 }
 float Producto::getPuntajePromedio() {
     return this->puntajePromedio;
@@ -45,6 +49,9 @@ void Producto::setPrecioVentaActual(float precioVentaActual) {
 }
 void Producto::setStock(int stock) {
     this->stock = stock;
+}
+void Producto::setStockMinimo(int stockMinimo) {
+    this->stockMinimo = stockMinimo;
 }
 void Producto::setPuntajePromedio(float puntajePromedio) {
     this->puntajePromedio = puntajePromedio;

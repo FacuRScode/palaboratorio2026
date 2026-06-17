@@ -47,6 +47,19 @@ vector<OrdenDeCompra*> EmpleadoController::listarOrdenesDeCompra() const {
     return ordenesDeCompra;
 }
 
+bool EmpleadoController::productoEstaEnOrdenesPendientes(int codigoProducto) const {
+	for (OrdenDeCompra* orden : ordenesDeCompra) {
+		if (orden == nullptr) continue;
+		if (orden->getEstado() != Estado::Pendiente) continue;
+		for (LineaDetalleCompra* linea : orden->getDetalleCompra()) {
+			if (linea != nullptr && linea->getProducto() != nullptr && linea->getProducto()->getCodigo() == codigoProducto) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 EmpleadoController* EmpleadoController::getInstanciaEmpleado(){
     if (instanciaEmpleado == nullptr) {
         instanciaEmpleado = new EmpleadoController();
