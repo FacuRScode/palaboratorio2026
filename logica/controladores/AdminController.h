@@ -42,6 +42,7 @@ public:
 	bool eliminarCategoria(const string& nombre);
 	vector<Categoria*> listarCategorias() const;
 	bool asignarProductoACategoria(int codigoProducto, const string& nombreCategoria);
+	bool modificarCategoria(const string& nombreActual, const string& nuevoNombre, const string& nuevaDescripcion);
 
 	// -- Empleados -----------------------------------------------
 	Empleado* crearEmpleado(const string& nombre, const string& correo,
