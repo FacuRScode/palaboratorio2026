@@ -3,18 +3,16 @@
 //
 
 #include "VentaController.h"
-#include "EmpleadoController.h"
-#include <algorithm>
 
 using namespace std;
 
 // Inicializar el miembro estático
 VentaController* VentaController::instanciaVenta = nullptr;
 
-VentaController::VentaController(AdminController* admin, EmpleadoController* empleado) : adminCtrl(admin), empleadoCtrl(empleado) {}
+VentaController::VentaController(AdminController* admin) : adminCtrl(admin) {}
 
 // Constructor privado usado por el singleton
-VentaController::VentaController() : adminCtrl(nullptr), empleadoCtrl(nullptr) {}
+VentaController::VentaController() : adminCtrl(nullptr) {}
 
 VentaController* VentaController::getInstanciaVenta(){
 	if (instanciaVenta == nullptr) {
@@ -23,54 +21,7 @@ VentaController* VentaController::getInstanciaVenta(){
 	return instanciaVenta;
 }
 
-VentaController::~VentaController() {
-	for (Venta* v : ventas) delete v;
-}
-
-// Clientes (delega en EmpleadoController)
-Cliente* VentaController::registrarCliente(const string& rut, const string& nombre, const string& apellido,
-                                            const string& direccion, const string& correo) {
-    if (empleadoCtrl == nullptr) return nullptr;
-    return empleadoCtrl->registrarCliente(rut, nombre, apellido, direccion, correo);
-}
-
-// Ventas
-Venta* VentaController::crearVenta(const string& rutCliente, DTFecha fecha, DTHora hora) {
-	if (empleadoCtrl == nullptr) return nullptr;
-	Cliente* c = empleadoCtrl->buscarCliente(rutCliente);
-	if (c == nullptr) return nullptr;
-	Venta* v = new Venta(fecha, hora, c);
-	ventas.push_back(v);
-	return v;
-}
-
-bool VentaController::agregarLineaAVenta(Venta* venta, int codigoProducto, int cantidad) {
-	if (venta == nullptr) return false;
-	if (adminCtrl == nullptr) return false;
-	Producto* p = adminCtrl->buscarProducto(codigoProducto);
-	if (p == nullptr) return false;
-	if (p->getStock() < cantidad) return false;
-	// crear linea con precio actual del producto y referencia al producto
-	LineaDetalleVenta* linea = new LineaDetalleVenta(cantidad, p->getPrecioVentaActual(), p);
-	venta->addLinea(linea);
-	// disminuir stock
-	p->setStock(p->getStock() - cantidad);
-	return true;
-}
-
-vector<Venta*> VentaController::listarVentas() const {
-	return ventas;
-}
-
-vector<Venta*> VentaController::listarVentasPorCliente(const string& rut) const {
-	vector<Venta*> ventasCliente;
-	for (Venta* v : ventas) {
-		if (v->getCliente() != nullptr && v->getCliente()->getRut() == rut) {
-			ventasCliente.push_back(v);
-		}
-	}
-	return ventasCliente;
-}
+VentaController::~VentaController() {}
 
 // Calificaciones
 bool VentaController::calificarProducto(int codigoProducto, Puntaje puntaje, const string& comentario, DTFecha fecha) {
@@ -79,16 +30,4 @@ bool VentaController::calificarProducto(int codigoProducto, Puntaje puntaje, con
 	if (p == nullptr) return false;
 	Calificacion* cal = new Calificacion(puntaje, comentario, fecha, p);
 	return true;
-}
-
-bool VentaController::productoEstaEnVentas(int codigoProducto) const {
-	for (Venta* v : ventas) {
-		if (v == nullptr) continue;
-		for (LineaDetalleVenta* linea : v->getDetalle()) {
-			if (linea != nullptr && linea->getProducto() != nullptr && linea->getProducto()->getCodigo() == codigoProducto) {
-				return true;
-			}
-		}
-	}
-	return false;
 }

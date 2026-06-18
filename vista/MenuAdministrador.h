@@ -6,14 +6,12 @@
 #include <iostream>
 #include "../logica/controladores/AdminController.h"
 #include "../logica/controladores/AuthController.h"
-#include "../logica/controladores/VentaController.h"
 #include "../logica/controladores/EmpleadoController.h"
 
 class MenuAdministrador {
 private:
 	AdminController& ctrl;
 	AuthController* authCtrl;
-	VentaController* ventaCtrl;
 	EmpleadoController* empleadoCtrl;
 
 	void menuProductos();
@@ -23,7 +21,7 @@ private:
 
 public:
 	MenuAdministrador(AdminController& controller, AuthController* auth,
-					  VentaController* ventas = nullptr, EmpleadoController* empleados = nullptr);
+					  EmpleadoController* empleados = nullptr);
 	void mostrar();
 };
 

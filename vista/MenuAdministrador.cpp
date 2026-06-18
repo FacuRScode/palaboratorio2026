@@ -7,8 +7,8 @@
 #include <limits>
 
 MenuAdministrador::MenuAdministrador(AdminController& controller, AuthController* auth,
-									 VentaController* ventas, EmpleadoController* empleados)
-	: ctrl(controller), authCtrl(auth), ventaCtrl(ventas), empleadoCtrl(empleados) {}
+									 EmpleadoController* empleados)
+	: ctrl(controller), authCtrl(auth), empleadoCtrl(empleados) {}
 
 void MenuAdministrador::mostrar() {
 	while (true) {
@@ -151,8 +151,8 @@ void MenuAdministrador::menuProductos() {
 			vector<Producto*> eliminables;
 			for (auto p : todos) {
 				if (p == nullptr) continue;
-				bool tieneVentas = ventaCtrl ? ventaCtrl->productoEstaEnVentas(p->getCodigo()) : false;
-				bool tieneOrdenesPendientes = empleadoCtrl ? empleadoCtrl->productoEstaEnOrdenesPendientes(p->getCodigo()) : false;
+	bool tieneVentas = empleadoCtrl ? empleadoCtrl->productoEstaEnVentas(p->getCodigo()) : false;
+	bool tieneOrdenesPendientes = empleadoCtrl ? empleadoCtrl->productoEstaEnOrdenesPendientes(p->getCodigo()) : false;
 				if (!tieneVentas && !tieneOrdenesPendientes) {
 					eliminables.push_back(p);
 				}
@@ -195,7 +195,7 @@ void MenuAdministrador::menuProductos() {
 					}
 
 					// Verificar que el producto siga siendo eliminable
-					bool tieneVentas = ventaCtrl ? ventaCtrl->productoEstaEnVentas(codigo) : false;
+	bool tieneVentas = empleadoCtrl ? empleadoCtrl->productoEstaEnVentas(codigo) : false;
 					bool tieneOrdenesPendientes = empleadoCtrl ? empleadoCtrl->productoEstaEnOrdenesPendientes(codigo) : false;
 					if (tieneVentas || tieneOrdenesPendientes) {
 						std::cout << "\nError: El producto tiene ventas u ordenes de compra pendientes asociadas y no puede eliminarse.\n";

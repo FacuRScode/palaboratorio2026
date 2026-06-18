@@ -2,6 +2,10 @@
 #define EMPLEADOCONTROLLER_H
 #include "../dominio/Cliente.h"
 #include "../dominio/OrdenDeCompra.h"
+#include "../dominio/Venta.h"
+#include "../dominio/LineaDetalleVenta.h"
+#include "../dominio/DTFecha.h"
+#include "../dominio/DTHora.h"
 #include "AdminController.h"
 #pragma once
 
@@ -12,6 +16,7 @@ private:
     EmpleadoController();
     vector<Cliente*> clientes;
     vector<OrdenDeCompra*> ordenesDeCompra;
+    vector<Venta*> ventas;
     AdminController* adminCtrl;
 public:
     Cliente* registrarCliente(const string& rut, const string& nombre, const string& apellido,
@@ -27,5 +32,12 @@ public:
     ~EmpleadoController();
 
     bool productoEstaEnOrdenesPendientes(int codigoProducto) const;
+
+    // Ventas
+    Venta* crearVenta(const string& rutCliente, DTFecha fecha, DTHora hora);
+    bool agregarLineaAVenta(Venta* venta, int codigoProducto, int cantidad);
+    vector<Venta*> listarVentas() const;
+    vector<Venta*> listarVentasPorCliente(const string& rut) const;
+    bool productoEstaEnVentas(int codigoProducto) const;
 };
 #endif
