@@ -18,6 +18,10 @@ void MenuEmpleado::mostrar() {
 		cout << "3. Listar clientes\n";
 		cout << "4. Agregar orden de compra\n";
 		cout << "5. Eliminar orden de compra\n";
+		cout << "6. Crear venta\n";
+		cout << "7. Agregar linea a venta\n";
+		cout << "8. Listar ventas\n";
+		cout << "9. Listar ventas por cliente\n";
 		cout << "0. Cerrar sesion\n";
 		int op;
 		cout << "Seleccione una opcion: ";
@@ -89,6 +93,51 @@ void MenuEmpleado::mostrar() {
 			}
 			ctrl.eliminarOrdenDeCompra(lista[idx]);
 			cout << "Orden de compra eliminada." << endl;
+		} else if (op == 6) {
+			string rut;
+			cout << "RUT cliente: "; cin >> rut;
+			int dia, mes, anio, hora, minuto, segundo;
+			cout << "Fecha (dia mes anio): "; cin >> dia >> mes >> anio;
+			cout << "Hora (hora minuto segundo): "; cin >> hora >> minuto >> segundo;
+			DTFecha fecha(dia, mes, anio);
+			DTHora dh(hora, minuto, segundo);
+			Venta* v = ctrl.crearVenta(rut, fecha, dh);
+			cout << (v ? "Venta creada." : "Error creando venta (cliente no existe).") << endl;
+		} else if (op == 7) {
+			auto ventas = ctrl.listarVentas();
+			if (ventas.empty()) { cout << "No hay ventas creadas." << endl; continue; }
+			cout << "Ventas disponibles:\n";
+			for (size_t i = 0; i < ventas.size(); ++i) {
+				auto v = ventas[i];
+				cout << i << ": fecha=" << v->getFecha().getDia() << "/" << v->getFecha().getMes() << "/" << v->getFecha().getAnio();
+				cout << " hora=" << v->getHora().getHora() << ":" << v->getHora().getMinuto() << ":" << v->getHora().getSegundo() << "\n";
+			}
+			int idx;
+			cout << "Seleccione indice de venta: "; cin >> idx;
+			if (idx < 0 || idx >= (int)ventas.size()) { cout << "Indice invalido." << endl; continue; }
+			int codigo, cantidad;
+			cout << "Codigo producto: "; cin >> codigo;
+			cout << "Cantidad: "; cin >> cantidad;
+			bool ok = ctrl.agregarLineaAVenta(ventas[idx], codigo, cantidad);
+			cout << (ok ? "Linea agregada." : "No se pudo agregar linea (producto no existe/stock insuficiente/otro error).") << endl;
+		} else if (op == 8) {
+			auto vlist = ctrl.listarVentas();
+			cout << "Ventas:\n";
+			for (auto v : vlist) {
+				cout << "- Fecha: " << v->getFecha().getDia() << "/" << v->getFecha().getMes() << "/" << v->getFecha().getAnio();
+				cout << " Hora: " << v->getHora().getHora() << ":" << v->getHora().getMinuto() << ":" << v->getHora().getSegundo();
+				cout << " Total: " << v->calcularTotal() << "\n";
+			}
+		} else if (op == 9) {
+			string rut;
+			cout << "RUT cliente: "; cin >> rut;
+			auto vlist = ctrl.listarVentasPorCliente(rut);
+			cout << "Ventas de " << rut << ":\n";
+			for (auto v : vlist) {
+				cout << "- Fecha: " << v->getFecha().getDia() << "/" << v->getFecha().getMes() << "/" << v->getFecha().getAnio();
+				cout << " Hora: " << v->getHora().getHora() << ":" << v->getHora().getMinuto() << ":" << v->getHora().getSegundo();
+				cout << " Total: " << v->calcularTotal() << "\n";
+			}
 		} else {
 			cout << "Opcion invalida." << endl;
 		}

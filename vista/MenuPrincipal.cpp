@@ -7,7 +7,7 @@ using namespace std;
 MenuPrincipal::MenuPrincipal(AdminController& admin, EmpleadoController& empleado, VentaController& ventas)
 	: adminCtrl(admin), empleadoCtrl(empleado), ventaCtrl(ventas),
 	  authCtrl(&admin, &empleado),
-	  menuAdmin(admin, &authCtrl, &ventas, &empleado),
+	  menuAdmin(admin, &authCtrl, &empleado),
 	  menuEmpleado(empleado, &authCtrl),
 	  menuCliente(ventas, &authCtrl) {}
 

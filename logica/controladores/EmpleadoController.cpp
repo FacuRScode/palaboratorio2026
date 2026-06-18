@@ -70,4 +70,54 @@ EmpleadoController* EmpleadoController::getInstanciaEmpleado(){
 EmpleadoController::~EmpleadoController() {
     for (Cliente* c : clientes) delete c;
     for (OrdenDeCompra* o : ordenesDeCompra) delete o;
+    for (Venta* v : ventas) delete v;
+}
+
+// -- Ventas -------------------------------------------------------
+
+Venta* EmpleadoController::crearVenta(const string& rutCliente, DTFecha fecha, DTHora hora) {
+    if (adminCtrl == nullptr) return nullptr;
+    Cliente* c = buscarCliente(rutCliente);
+    if (c == nullptr) return nullptr;
+    Venta* v = new Venta(fecha, hora, c);
+    ventas.push_back(v);
+    return v;
+}
+
+bool EmpleadoController::agregarLineaAVenta(Venta* venta, int codigoProducto, int cantidad) {
+    if (venta == nullptr) return false;
+    if (adminCtrl == nullptr) return false;
+    Producto* p = adminCtrl->buscarProducto(codigoProducto);
+    if (p == nullptr) return false;
+    if (p->getStock() < cantidad) return false;
+    LineaDetalleVenta* linea = new LineaDetalleVenta(cantidad, p->getPrecioVentaActual(), p);
+    venta->addLinea(linea);
+    p->setStock(p->getStock() - cantidad);
+    return true;
+}
+
+vector<Venta*> EmpleadoController::listarVentas() const {
+    return ventas;
+}
+
+vector<Venta*> EmpleadoController::listarVentasPorCliente(const string& rut) const {
+    vector<Venta*> ventasCliente;
+    for (Venta* v : ventas) {
+        if (v->getCliente() != nullptr && v->getCliente()->getRut() == rut) {
+            ventasCliente.push_back(v);
+        }
+    }
+    return ventasCliente;
+}
+
+bool EmpleadoController::productoEstaEnVentas(int codigoProducto) const {
+    for (Venta* v : ventas) {
+        if (v == nullptr) continue;
+        for (LineaDetalleVenta* linea : v->getDetalle()) {
+            if (linea != nullptr && linea->getProducto() != nullptr && linea->getProducto()->getCodigo() == codigoProducto) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
