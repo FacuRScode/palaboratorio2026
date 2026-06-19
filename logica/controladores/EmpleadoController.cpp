@@ -26,12 +26,35 @@ Cliente* EmpleadoController::buscarCliente(const string& rut) const {
     return nullptr;
 }
 
+Cliente* EmpleadoController::buscarClientePorCorreo(const string& correo) {
+    for (auto c : clientes) {
+        if (c != nullptr && c->getCorreo() == correo) {
+            return c;
+        }
+    }
+    return nullptr;
+}
+
+void EmpleadoController::modificaCliente(Cliente* cliente, const string &nombre, const string &apellido,const string &direccion, const string &correo){
+    cliente->setNombre(nombre);
+    cliente->setApellido(apellido);
+    cliente->setDireccion(direccion);
+    cliente->setCorreo(correo);
+}
+
 vector<Cliente*> EmpleadoController::listarClientes() const {
     return clientes;
 }
 
+OrdenDeCompra* EmpleadoController::crearOrdenDeCompra(DTFecha fechaEmision, Estado estado, DTFecha fechaRecepcion, Proveedor* proveedor){
+    OrdenDeCompra* o = new OrdenDeCompra(fechaEmision, estado, fechaRecepcion, proveedor);
+    return o;
+}
+
 void EmpleadoController::agregarOrdenDeCompra(OrdenDeCompra* orden){
-    ordenesDeCompra.push_back(orden);
+    if (orden != nullptr) {
+        ordenesDeCompra.push_back(orden);
+    }
 }
 
 void EmpleadoController::eliminarOrdenDeCompra(OrdenDeCompra* orden){
@@ -45,6 +68,12 @@ void EmpleadoController::eliminarOrdenDeCompra(OrdenDeCompra* orden){
 
 vector<OrdenDeCompra*> EmpleadoController::listarOrdenesDeCompra() const {
     return ordenesDeCompra;
+}
+
+bool EmpleadoController::agregarLineaDetalleCompra(OrdenDeCompra* orden, int cantidad, Producto* producto){
+    if (adminCtrl == nullptr) return false;
+    LineaDetalleCompra* linea= new LineaDetalleCompra(cantidad, producto);
+    orden->addLineaDetalleCompra(linea);
 }
 
 bool EmpleadoController::productoEstaEnOrdenesPendientes(int codigoProducto) const {
