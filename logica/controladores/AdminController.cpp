@@ -3,6 +3,7 @@
 //
 
 #include "AdminController.h"
+#include "EmpleadoController.h"
 #include <algorithm>
 
 using namespace std;
@@ -84,6 +85,13 @@ bool AdminController::productoAsociadoAProveedor(int codigoProducto) const {
 }
 
 bool AdminController::eliminarProducto(int codigo, bool eliminarAsociaciones) {
+	// Verificar que el producto no tenga ventas ni ordenes pendientes
+	EmpleadoController* empCtrl = EmpleadoController::getInstanciaEmpleado();
+	if (empCtrl != nullptr) {
+		if (empCtrl->productoEstaEnVentas(codigo)) return false;
+		if (empCtrl->productoEstaEnOrdenesPendientes(codigo)) return false;
+	}
+
 	for (auto it = productos.begin(); it != productos.end(); ++it) {
 		Producto* p = *it;
 		if (p != nullptr && p->getCodigo() == codigo) {

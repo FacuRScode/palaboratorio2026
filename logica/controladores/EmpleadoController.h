@@ -37,7 +37,7 @@ public:
                               const string& direccion, const string& correo, const string& contrasena = "");
     Cliente* buscarCliente(const string& rut) const;
     Cliente* buscarClientePorCorreo(const string& correo);
-    void modificaCliente(Cliente* cliente, const string &nombre, const string &apellido,const string &direccion, const string &correo);
+    bool modificaCliente(Cliente* cliente, const string &nombre, const string &apellido,const string &direccion, const string &correo);
     vector<Cliente*> listarClientes() const;
 
     OrdenDeCompra* crearOrdenDeCompra(DTFecha fechaEmision, Estado estado, DTFecha fechaRecepcion, Proveedor* proveedor);

@@ -42,38 +42,11 @@ void MenuEmpleado::mostrar() {
 		} else if (op == 1) {
 			string rut, nombre, apellido, direccion, correo, contrasena;
 			char respuesta;
-			while(true){
-				cout << "RUT: "; cin >> rut;
-				if(empleadoCtrl->buscarCliente(rut) != nullptr){
-					cout<<"Error: Ya existe un cliente con ese RUT."<<endl;
-					cout<<"¿Desea intentarlo con otro RUT? (s/n): "; cin >> respuesta;
-					if (respuesta == 'n') {
-						cout << "Registro cancelado." << endl;
-						return;
-					}
-					cout << endl;
-				} else {
-					break;
-				}
-			}
+			cout << "RUT: "; cin >> rut;
 			cout << "Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nombre);
 			cout << "Apellido: "; getline(cin, apellido);
 			cout << "Direccion: "; getline(cin, direccion);
-
-			while(true){
-				cout << "Correo: "; getline(cin, correo);
-				if(empleadoCtrl->buscarClientePorCorreo(correo) != nullptr){
-					cout<<"Error: Ya existe un cliente con ese correo."<<endl;
-					cout<<"¿Desea intentarlo con otro correo? (s/n): "; cin >> respuesta;
-					if (respuesta == 'n') {
-						cout << "Registro cancelado." << endl;
-						return;
-					}
-					cout << endl;
-				} else {
-					break;
-				}
-			}
+			cout << "Correo: "; getline(cin, correo);
 			cout << "Contrasena: "; getline(cin, contrasena);
 			cout << "\n Resumen del registro: " << endl;
 			cout << "RUT: " << rut << endl;
@@ -81,10 +54,14 @@ void MenuEmpleado::mostrar() {
 			cout << "Direccion: " << direccion << endl;
 			cout << "Correo: " << correo << endl;
 			cout << "Contrasena: " << contrasena <<endl;
-			cout << "¿Desea confiirmar el registro? (s/n): "; cin >> respuesta;
+			cout << "¿Desea confirmar el registro? (s/n): "; cin >> respuesta;
 			if(respuesta == 's'){
-				empleadoCtrl->registrarCliente(rut, nombre, apellido, direccion, correo, contrasena);
-				cout << "Cliente registrado con exito."<<endl;
+				Cliente* nuevo = empleadoCtrl->registrarCliente(rut, nombre, apellido, direccion, correo, contrasena);
+				if (nuevo != nullptr) {
+					cout << "Cliente registrado con exito."<<endl;
+				} else {
+					cout << "Error: El RUT o el correo ya estan registrados en el sistema."<<endl;
+				}
 			}
 			else{
 				cout << "Registro cancelado."<<endl;
@@ -116,39 +93,18 @@ void MenuEmpleado::mostrar() {
 			cout << "Nuevo Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nuevoNombre);
     		cout << "Nuevo Apellido: "; getline(cin, nuevoApellido);
 			cout << "Nueva Direccion: "; getline(cin, nuevaDireccion);
-			while(true){
-				cout << "Correo: "; getline(cin, nuevoCorreo);
-				Cliente* clienteConCorreo = empleadoCtrl->buscarClientePorCorreo(nuevoCorreo);
-				if(clienteConCorreo != nullptr && clienteConCorreo != cliente){
-					cout<<"Error: Ya existe un cliente con ese correo."<<endl;
-					cout<<"¿Desea intentarlo con otro correo? (s/n): "; cin >> respuesta;
-					if (respuesta == 'n') {
-						cout << "\n Resumen de la edicion: " << endl;
-						cout << "Nombre Completo: " << nuevoNombre << " " << nuevoApellido << endl;
-						cout << "Direccion: " << nuevaDireccion << endl;
-						cout << "Correo: " << cliente->getCorreo() << endl;
-						cout << "¿Desea confirmar la modificacion? (s/n): "; cin >> respuesta;
-            			if(respuesta == 's'){
-                			empleadoCtrl->modificaCliente(cliente, nuevoNombre, nuevoApellido, nuevaDireccion, cliente->getCorreo());
-                			cout << "Cliente modificado con exito." << endl;
-							return;
-            			} else {
-                				 cout << "Modificacion cancelada. Se conservan los datos originales." << endl;
-							 return;
-            			}
-					}
-   				} else {
-      				break;
-				}
-			}
+			cout << "Correo: "; getline(cin, nuevoCorreo);
 			cout << "\n Resumen de la edicion: " << endl;
 			cout << "Nombre Completo: " << nuevoNombre << " " << nuevoApellido << endl;
 			cout << "Direccion: " << nuevaDireccion << endl;
 			cout << "Correo: " << nuevoCorreo << endl;
 			cout << "¿Desea confirmar la modificacion? (s/n): "; cin >> respuesta;
             if(respuesta == 's'){
-                empleadoCtrl->modificaCliente(cliente, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo);
-                cout << "Cliente modificado con exito." << endl;
+                if (empleadoCtrl->modificaCliente(cliente, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo)) {
+                    cout << "Cliente modificado con exito." << endl;
+                } else {
+                    cout << "Error: El correo ya pertenece a otro cliente. Modificacion cancelada." << endl;
+                }
             } else {
                 cout << "Modificacion cancelada. Se conservan los datos originales." << endl;
             }
@@ -217,11 +173,10 @@ void MenuEmpleado::mostrar() {
 
                 cout << "Ingrese la cantidad: "; cin >> cantidad;
 
-                if (cantidad > producto->getStock()) {
-                    cout << "Error: No hay stock suficiente, linea no agregada." << endl;
-                } else {
-                    empleadoCtrl->agregarLineaAVenta(venta, codigoProducto, cantidad);
+                if (empleadoCtrl->agregarLineaAVenta(venta, codigoProducto, cantidad)) {
                     cout << "Linea agregada con exito." << endl;
+                } else {
+                    cout << "Error: No hay stock suficiente o el producto no existe, linea no agregada." << endl;
                 }
 
                 cout << "¿Desea seguir ingresando lineas de detalle? (s/n): "; cin >> respuesta;
