@@ -286,3 +286,17 @@ bool AdminController::asociarProveedorProducto(const string& rutProveedor, int c
 	return true;
 }
 
+vector<ProveedorProducto*> AdminController::listarAsociacionesDeProducto(int codigoProducto) const {
+	vector<ProveedorProducto*> resultado;
+	for (Proveedor* pr : proveedores) {
+		if (pr == nullptr) continue;
+		for (ProveedorProducto* pp : pr->getProductosOfrecidos()) {
+			if (pp != nullptr && pp->getProducto() != nullptr &&
+				pp->getProducto()->getCodigo() == codigoProducto) {
+				resultado.push_back(pp);
+			}
+		}
+	}
+	return resultado;
+}
+

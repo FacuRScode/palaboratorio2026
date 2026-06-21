@@ -1,7 +1,8 @@
 #include "Calificacion.h"
+#include "Cliente.h"
 
-Calificacion::Calificacion(Puntaje puntaje, string comentario, DTFecha fecha, Producto* productoCalificado)
-	: puntaje(puntaje), comentario(comentario), fecha(fecha), productoCalificado(productoCalificado) {}
+Calificacion::Calificacion(Puntaje puntaje, string comentario, DTFecha fecha, Producto* productoCalificado, Cliente* clienteCalificador)
+	: puntaje(puntaje), comentario(comentario), fecha(fecha), productoCalificado(productoCalificado), clienteCalificador(clienteCalificador) {}
 
 Puntaje Calificacion::getPuntaje(){
 	return this->puntaje;
@@ -19,6 +20,10 @@ Producto* Calificacion::getProductoCalificado(){
 	return this->productoCalificado;
 }
 
+Cliente* Calificacion::getClienteCalificador(){
+	return this->clienteCalificador;
+}
+
 void Calificacion::setPuntaje(Puntaje puntaje){
 	this->puntaje = puntaje;
 }
@@ -33,4 +38,8 @@ void Calificacion::setFecha(DTFecha fecha){
 
 void Calificacion::setProductoCalificado(Producto* productoCalificado){
 	this->productoCalificado = productoCalificado;
+}
+
+void Calificacion::setClienteCalificador(Cliente* clienteCalificador){
+	this->clienteCalificador = clienteCalificador;
 }

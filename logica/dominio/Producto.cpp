@@ -10,6 +10,7 @@ Producto::Producto(int codigo, string nombre, string descripcion, float precioVe
     this->stockMinimo = stockMinimo;
     this->categoria = categoria;
     this->puntajePromedio = puntajePromedio;
+    this->cantidadCalificaciones = 0;
 }
 int Producto::getCodigo() {
     return this->codigo;
@@ -28,6 +29,9 @@ int Producto::getStock() {
 }
 int Producto::getStockMinimo() {
     return this->stockMinimo;
+}
+int Producto::getCantidadCalificaciones() {
+    return this->cantidadCalificaciones;
 }
 float Producto::getPuntajePromedio() {
     return this->puntajePromedio;
@@ -52,6 +56,9 @@ void Producto::setStock(int stock) {
 }
 void Producto::setStockMinimo(int stockMinimo) {
     this->stockMinimo = stockMinimo;
+}
+void Producto::setCantidadCalificaciones(int cantidad) {
+    this->cantidadCalificaciones = cantidad;
 }
 void Producto::setPuntajePromedio(float puntajePromedio) {
     this->puntajePromedio = puntajePromedio;

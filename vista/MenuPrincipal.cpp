@@ -7,9 +7,9 @@ using namespace std;
 MenuPrincipal::MenuPrincipal(AdminController& admin, EmpleadoController& empleado, VentaController& ventas)
 	: adminCtrl(admin), empleadoCtrl(empleado), ventaCtrl(ventas),
 	  authCtrl(&admin, &empleado),
-	  menuAdmin(admin, &authCtrl, &empleado),
-	  menuEmpleado(empleado, &authCtrl),
-	  menuCliente(ventas, &authCtrl) {}
+	  menuAdmin(admin, &authCtrl, &empleado, &ventaCtrl),
+	  menuEmpleado(empleado, &authCtrl, &ventaCtrl),
+	  menuCliente(ventas, &authCtrl, &empleado) {}
 
 void MenuPrincipal::mostrar() {
 	while (true) {
