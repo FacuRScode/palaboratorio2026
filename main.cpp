@@ -7,7 +7,7 @@
 int main() {
     AdminController admin;
     EmpleadoController empleado(&admin);
-    VentaController ventas(&admin);
+    VentaController ventas(&admin, &empleado);
 
     // cuentas por defecto
     admin.crearEmpleado("Administrador", "admin", "admin", "Administrador");

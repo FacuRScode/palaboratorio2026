@@ -69,6 +69,7 @@ public:
 	ProveedorProducto* buscarAsociacion(const string& rutProveedor, int codigoProducto) const;
 	bool asociarProveedorProducto(const string& rutProveedor, int codigoProducto,
 								  int precioCompra, int tiempoEntrega);
+	vector<ProveedorProducto*> listarAsociacionesDeProducto(int codigoProducto) const;
 };
 
 #endif //PALABORATORIO2026_ADMINCONTROLLER_H

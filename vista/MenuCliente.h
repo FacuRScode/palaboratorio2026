@@ -4,13 +4,18 @@
 #pragma once
 #include "../logica/controladores/VentaController.h"
 #include "../logica/controladores/AuthController.h"
+#include "../logica/controladores/EmpleadoController.h"
 
 class MenuCliente {
 private:
 	VentaController& ctrl;
 	AuthController* authCtrl;
+	EmpleadoController* empleadoCtrl;
+
+	void calificarProducto();
+	void consultarInfoDetalladaProducto();
 public:
-	MenuCliente(VentaController& controller, AuthController* auth);
+	MenuCliente(VentaController& controller, AuthController* auth, EmpleadoController* empleado);
 	void mostrar();
 };
 

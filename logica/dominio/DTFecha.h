@@ -15,5 +15,9 @@ class DTFecha{
     void setDia(int dia);
     void setMes(int mes);
     void setAnio(int anio);
+
+    bool operator<=(const DTFecha& otra) const;
+    bool operator>=(const DTFecha& otra) const;
+    bool operator<(const DTFecha& otra) const;
 };
 #endif

@@ -27,4 +27,20 @@ void DTFecha::setAnio(int anio) {
 	this->anio = anio;
 }
 
+bool DTFecha::operator<=(const DTFecha& otra) const {
+	if (anio != otra.anio) return anio <= otra.anio;
+	if (mes != otra.mes) return mes <= otra.mes;
+	return dia <= otra.dia;
+}
+
+bool DTFecha::operator>=(const DTFecha& otra) const {
+	return otra <= *this;
+}
+
+bool DTFecha::operator<(const DTFecha& otra) const {
+	if (anio != otra.anio) return anio < otra.anio;
+	if (mes != otra.mes) return mes < otra.mes;
+	return dia < otra.dia;
+}
+
 
