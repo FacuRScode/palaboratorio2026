@@ -13,7 +13,8 @@ EmpleadoController::EmpleadoController() : adminCtrl(nullptr) {}
 
 Cliente* EmpleadoController::registrarCliente(const string& rut, const string& nombre, const string& apellido,
                                             const string& direccion, const string& correo, const string& contrasena) {
-    if (buscarCliente(rut) != nullptr) return nullptr; // ya existe
+    if (buscarCliente(rut) != nullptr) return nullptr; // RUT ya existe
+    if (buscarClientePorCorreo(correo) != nullptr) return nullptr; // correo ya existe
     Cliente* c = new Cliente(rut, nombre, apellido, direccion, correo, contrasena);
     clientes.push_back(c);
     return c;
@@ -35,11 +36,18 @@ Cliente* EmpleadoController::buscarClientePorCorreo(const string& correo) {
     return nullptr;
 }
 
-void EmpleadoController::modificaCliente(Cliente* cliente, const string &nombre, const string &apellido,const string &direccion, const string &correo){
+bool EmpleadoController::modificaCliente(Cliente* cliente, const string &nombre, const string &apellido,const string &direccion, const string &correo){
+    if (cliente == nullptr) return false;
+    // Si el correo cambia, verificar que no pertenezca a otro cliente
+    if (correo != cliente->getCorreo()) {
+        Cliente* otro = buscarClientePorCorreo(correo);
+        if (otro != nullptr && otro != cliente) return false;
+    }
     cliente->setNombre(nombre);
     cliente->setApellido(apellido);
     cliente->setDireccion(direccion);
     cliente->setCorreo(correo);
+    return true;
 }
 
 vector<Cliente*> EmpleadoController::listarClientes() const {

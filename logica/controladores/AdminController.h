@@ -15,6 +15,9 @@
 
 using namespace std;
 
+// Forward declaration para evitar dependencia circular
+class EmpleadoController;
+
 class AdminController {
 private:
 	static AdminController* instanciaAdmin;
