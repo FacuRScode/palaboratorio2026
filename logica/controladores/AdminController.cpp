@@ -211,6 +211,13 @@ bool AdminController::eliminarCategoria(const string& nombre) {
 	for (auto it = categorias.begin(); it != categorias.end(); ++it) {
 		Categoria* c = *it;
 		if (c != nullptr && c->getNombre() == nombre) {
+			// Desasignar la categoria de todos los productos que la referencian
+			// para evitar dangling pointers que causarian crash al acceder a getCategoria()
+			for (Producto* p : productos) {
+				if (p != nullptr && p->getCategoria() == c) {
+					p->setCategoria(nullptr);
+				}
+			}
 			delete c;
 			categorias.erase(it);
 			return true;

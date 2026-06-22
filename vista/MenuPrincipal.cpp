@@ -53,7 +53,12 @@ void MenuPrincipal::mostrarLogin() {
 				cout << "2. Cancelar\n";
 				int op;
 				cout << "Seleccione una opcion: ";
-				cin >> op;
+				if (!(cin >> op)) {
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "Entrada invalida. Intente nuevamente." << endl;
+					continue;
+				}
 				if (op == 2) {
 					cout << "Operacion cancelada." << endl;
 					return; // vuelve al menu principal sin salir del sistema

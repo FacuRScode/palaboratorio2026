@@ -34,7 +34,12 @@ void MenuEmpleado::mostrar() {
 
 			int op;
 			cout << "Seleccione una opcion: ";
-			cin >> op;
+			if (!(cin >> op)) {
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Entrada invalida. Por favor ingrese un numero." << endl;
+				continue;
+			}
 
 			if (op == 0) {
 				char confirmar;
@@ -615,12 +620,27 @@ void MenuEmpleado::registrarRecepcionOrdenCompra() {
 		vector<int> cantidadesRecibidas;
 		cout << "\n--- Ingrese las cantidades recibidas ---\n";
 		for (const auto& linea : detalle.lineas) {
-			int cant;
-			cout << "  " << linea.nombreProducto << " (pedido: " << linea.cantidad << "): ";
-			cin >> cant;
+			int cant = -1;
+			while (true) {
+				cout << "  " << linea.nombreProducto << " (pedido: " << linea.cantidad << "): ";
+				cin >> cant;
+				if (cin.fail()) {
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					cout << "    Error: ingrese un numero valido (0 o mayor)." << endl;
+					continue;
+				}
+				if (cant < 0) {
+					cout << "    Error: la cantidad no puede ser negativa. Ingrese 0 o un valor positivo." << endl;
+					continue;
+				}
+				break;
+			}
 			cantidadesRecibidas.push_back(cant);
 		}
 
+		// Preguntar si desea continuar antes de confirmar
+		char confirmar;
 		cout << "\n--- Resumen de recepcion ---\n";
 		cout << "Proveedor: " << detalle.resumen.empresaProveedor << endl;
 		for (size_t i = 0; i < detalle.lineas.size(); ++i) {
@@ -629,7 +649,6 @@ void MenuEmpleado::registrarRecepcionOrdenCompra() {
 				 << " | recibido " << cantidadesRecibidas[i] << endl;
 		}
 
-		char confirmar;
 		cout << "\n¿Desea confirmar la recepcion de esta orden? (s/n): ";
 		cin >> confirmar;
 		if (confirmar != 's' && confirmar != 'S') {
@@ -639,9 +658,9 @@ void MenuEmpleado::registrarRecepcionOrdenCompra() {
 
 		ResultadoRegistrarRecepcionOrden recepcion = ctrl.registrarRecepcionOrdenPendiente(id, cantidadesRecibidas);
 		if (!recepcion.idValido) {
-			cout << "Error: ID invalido." << endl;
+			cout << "Error: ID invalido. La orden ya no esta pendiente o no existe." << endl;
 		} else if (!recepcion.cantidadesValidas) {
-			cout << "Error: Cantidades recibidas invalidas." << endl;
+			cout << "Error: Cantidades recibidas invalidas. Verifique que coincidan con las lineas de la orden y no sean negativas." << endl;
 		} else if (recepcion.exito) {
 			cout << "\nRecepcion registrada con exito." << endl;
 			cout << "La orden ha pasado al estado 'Recibida'." << endl;

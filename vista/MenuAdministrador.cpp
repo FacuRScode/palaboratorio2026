@@ -29,7 +29,12 @@ void MenuAdministrador::mostrar() {
 			std::cout << "0. Cerrar sesion\n";
 			int op;
 			std::cout << "Seleccione una opcion: ";
-			std::cin >> op;
+			if (!(std::cin >> op)) {
+				std::cin.clear();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cout << "Entrada invalida. Por favor ingrese un numero." << std::endl;
+				continue;
+			}
 			switch (op) {
 				case 1: menuProductos(); break;
 				case 2: menuCategorias(); break;
@@ -370,7 +375,12 @@ void MenuAdministrador::menuProductos() {
 			std::cout << "0. Volver\n";
 			int op;
 			std::cout << "Seleccione una opcion: ";
-			std::cin >> op;
+			if (!(std::cin >> op)) {
+				std::cin.clear();
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cout << "Entrada invalida. Por favor ingrese un numero." << std::endl;
+				continue;
+			}
 			if (op == 0) return;
 			if (op == 1) {
 				// Solicitar datos basicos con validacion de codigo unico
@@ -934,18 +944,23 @@ void MenuAdministrador::consultarUnidadesVendidasProducto() {
 void MenuAdministrador::menuCategorias() {
 	try {
 		while (true) {
-			std::cout << "\n--- Categorias ---\n";
-			std::cout << "1. Crear categoria\n";
-			std::cout << "2. Listar categorias\n";
-			std::cout << "3. Buscar categoria por nombre\n";
-			std::cout << "4. Eliminar categoria\n";
-			std::cout << "5. Asignar producto a categoria\n";
-			std::cout << "6. Modificar categoria\n";
-			std::cout << "0. Volver\n";
-			int op;
-			std::cout << "Seleccione una opcion: ";
-			std::cin >> op;
-			if (op == 0) return;
+		std::cout << "\n--- Categorias ---\n";
+		std::cout << "1. Crear categoria\n";
+		std::cout << "2. Listar categorias\n";
+		std::cout << "3. Buscar categoria por nombre\n";
+		std::cout << "4. Eliminar categoria\n";
+		std::cout << "5. Asignar producto a categoria\n";
+		std::cout << "6. Modificar categoria\n";
+		std::cout << "0. Volver\n";
+		int op;
+		std::cout << "Seleccione una opcion: ";
+		if (!(std::cin >> op)) {
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Entrada invalida. Por favor ingrese un numero." << std::endl;
+			continue;
+		}
+		if (op == 0) return;
 			if (op == 1) {
 				// 1. Listar categorias existentes
 				auto categoriasExistentes = ctrl.listarCategorias();
@@ -1139,16 +1154,21 @@ void MenuAdministrador::menuCategorias() {
 void MenuAdministrador::menuEmpleados() {
 	try {
 		while (true) {
-			std::cout << "\n--- Empleados ---\n";
-			std::cout << "1. Alta de empleado\n";
-			std::cout << "2. Listar empleados\n";
-			std::cout << "3. Buscar empleado por correo\n";
-			std::cout << "4. Eliminar empleado por correo\n";
-			std::cout << "0. Volver\n";
-			int op;
-			std::cout << "Seleccione una opcion: ";
-			std::cin >> op;
-			if (op == 0) return;
+		std::cout << "\n--- Empleados ---\n";
+		std::cout << "1. Alta de empleado\n";
+		std::cout << "2. Listar empleados\n";
+		std::cout << "3. Buscar empleado por correo\n";
+		std::cout << "4. Eliminar empleado por correo\n";
+		std::cout << "0. Volver\n";
+		int op;
+		std::cout << "Seleccione una opcion: ";
+		if (!(std::cin >> op)) {
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Entrada invalida. Por favor ingrese un numero." << std::endl;
+			continue;
+		}
+		if (op == 0) return;
 			if (op == 1) {
 				std::string nombre;
 				std::string correo;
@@ -1266,18 +1286,23 @@ void MenuAdministrador::menuEmpleados() {
 void MenuAdministrador::menuProveedores() {
 	try {
 		while (true) {
-			std::cout << "\n--- Proveedores ---\n";
-			std::cout << "1. Crear proveedor\n";
-			std::cout << "2. Listar proveedores\n";
-			std::cout << "3. Buscar proveedor por RUT\n";
-			std::cout << "4. Eliminar proveedor por RUT\n";
-			std::cout << "5. Modificar proveedor\n";
-			std::cout << "6. Asociar producto a proveedor\n";
-			std::cout << "0. Volver\n";
-			int op;
-			std::cout << "Seleccione una opcion: ";
-			std::cin >> op;
-			if (op == 0) return;
+		std::cout << "\n--- Proveedores ---\n";
+		std::cout << "1. Crear proveedor\n";
+		std::cout << "2. Listar proveedores\n";
+		std::cout << "3. Buscar proveedor por RUT\n";
+		std::cout << "4. Eliminar proveedor por RUT\n";
+		std::cout << "5. Modificar proveedor\n";
+		std::cout << "6. Asociar producto a proveedor\n";
+		std::cout << "0. Volver\n";
+		int op;
+		std::cout << "Seleccione una opcion: ";
+		if (!(std::cin >> op)) {
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::cout << "Entrada invalida. Por favor ingrese un numero." << std::endl;
+			continue;
+		}
+		if (op == 0) return;
 			if (op == 1) {
 				std::string rut;
 				std::string empresa;

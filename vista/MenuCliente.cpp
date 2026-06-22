@@ -21,7 +21,12 @@ void MenuCliente::mostrar() {
 			cout << "0. Cerrar sesion\n";
 			int op;
 			cout << "Seleccione una opcion: ";
-			cin >> op;
+			if (!(cin >> op)) {
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Entrada invalida. Por favor ingrese un numero." << endl;
+				continue;
+			}
 			if (op == 0) {
 				char confirmar;
 				cout << "¿Esta seguro de cerrar la sesion? (s/n): ";
