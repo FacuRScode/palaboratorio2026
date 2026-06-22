@@ -1,6 +1,7 @@
 #include "MenuCliente.h"
 #include <iostream>
 #include <limits>
+#include <exception>
 
 using namespace std;
 
@@ -9,186 +10,170 @@ MenuCliente::MenuCliente(VentaController& controller, AuthController* auth, Empl
 
 void MenuCliente::mostrar() {
 	while (true) {
-		cout << "\n--- Menu Cliente ---\n";
-		if (authCtrl && authCtrl->haySesionActiva()) {
-			Sesion s = authCtrl->getSesionActual();
-			cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
-		}
-		cout << "1. Calificar producto\n";
-		cout << "2. Consultar informacion detallada de un producto\n";
-		cout << "0. Cerrar sesion\n";
-		int op;
-		cout << "Seleccione una opcion: ";
-		cin >> op;
-		if (op == 0) {
-			if (authCtrl) authCtrl->cerrarSesion();
-			cout << "Sesion cerrada." << endl;
-			return;
-		}
-		if (op == 1) {
-			calificarProducto();
-		} else if (op == 2) {
-			consultarInfoDetalladaProducto();
-		} else {
-			cout << "Opcion invalida." << endl;
+		try {
+			cout << "\n--- Menu Cliente ---\n";
+			if (authCtrl && authCtrl->haySesionActiva()) {
+				Sesion s = authCtrl->getSesionActual();
+				cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
+			}
+			cout << "1. Calificar producto\n";
+			cout << "2. Consultar informacion detallada de un producto\n";
+			cout << "0. Cerrar sesion\n";
+			int op;
+			cout << "Seleccione una opcion: ";
+			cin >> op;
+			if (op == 0) {
+				if (authCtrl) authCtrl->cerrarSesion();
+				cout << "Sesion cerrada." << endl;
+				return;
+			}
+			if (op == 1) {
+				calificarProducto();
+			} else if (op == 2) {
+				consultarInfoDetalladaProducto();
+			} else {
+				cout << "Opcion invalida." << endl;
+			}
+		} catch (const exception& ex) {
+			cout << "Error inesperado: " << ex.what() << endl;
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		} catch (...) {
+			cout << "Error inesperado en la operacion." << endl;
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		}
 	}
 }
 
 void MenuCliente::calificarProducto() {
-	if (!authCtrl || !authCtrl->haySesionActiva()) {
-		cout << "Debe iniciar sesion primero." << endl;
-		return;
-	}
-
-	string correoCliente = authCtrl->getSesionActual().correo;
-
-	// 1. Listar productos comprados por el cliente
-	vector<Producto*> productosComprados = ctrl.listarProductosComprados(correoCliente);
-
-	if (productosComprados.empty()) {
-		cout << "\nNo ha comprado ningun producto aun. No puede calificar." << endl;
-		return;
-	}
-
-	cout << "\n--- Productos que ha comprado ---\n";
-	for (Producto* p : productosComprados) {
-		if (p != nullptr) {
-			cout << "  Codigo: " << p->getCodigo()
-				 << " | Nombre: " << p->getNombre()
-				 << " | Descripcion: " << p->getDescripcion() << endl;
+	try {
+		if (!authCtrl || !authCtrl->haySesionActiva()) {
+			cout << "Debe iniciar sesion primero." << endl;
+			return;
 		}
-	}
 
-	// 2. Seleccionar producto
-	int codigo;
-	cout << "\nSeleccione el codigo del producto a calificar: ";
-	cin >> codigo;
-
-	// Validar que el producto esté en la lista de comprados
-	Producto* productoSeleccionado = nullptr;
-	for (Producto* p : productosComprados) {
-		if (p != nullptr && p->getCodigo() == codigo) {
-			productoSeleccionado = p;
-			break;
+		string correoCliente = authCtrl->getSesionActual().correo;
+		vector<ProductoClienteInfo> productosComprados = ctrl.listarProductosCompradosCliente(correoCliente);
+		if (productosComprados.empty()) {
+			cout << "\nNo ha comprado ningun producto aun. No puede calificar." << endl;
+			return;
 		}
-	}
 
-	if (productoSeleccionado == nullptr) {
-		cout << "El codigo ingresado no corresponde a un producto comprado." << endl;
-		return;
-	}
+		cout << "\n--- Productos que ha comprado ---\n";
+		for (const ProductoClienteInfo& p : productosComprados) {
+			cout << "  Codigo: " << p.codigo
+				 << " | Nombre: " << p.nombre
+				 << " | Descripcion: " << p.descripcion << endl;
+		}
 
-	// 3. Ingresar puntaje
-	int punt;
-	cout << "Ingrese puntaje (1-5): ";
-	cin >> punt;
+		int codigo;
+		int puntaje;
+		string comentario;
+		cout << "\nSeleccione el codigo del producto a calificar: ";
+		cin >> codigo;
+		cout << "Ingrese puntaje (1-5): ";
+		cin >> puntaje;
+		cout << "Ingrese comentario (opcional, presione Enter para omitir): ";
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		getline(cin, comentario);
 
-	if (punt < 1 || punt > 5) {
-		cout << "Puntaje invalido. Debe ser un numero entre 1 y 5." << endl;
-		return;
-	}
+		cout << "\n--- Resumen de calificacion ---\n";
+		cout << "Producto codigo: " << codigo << "\n";
+		cout << "Puntaje: " << puntaje << "/5\n";
+		cout << "Comentario: " << (comentario.empty() ? "(sin comentario)" : comentario) << "\n";
 
-	Puntaje p = static_cast<Puntaje>(punt);
+		char confirmacion;
+		cout << "\n¿Confirmar calificacion? (s/n): ";
+		cin >> confirmacion;
+		if (confirmacion != 's' && confirmacion != 'S') {
+			cout << "Calificacion cancelada." << endl;
+			return;
+		}
 
-	// 4. Ingresar comentario opcional
-	string comentario;
-	cout << "Ingrese comentario (opcional, presione Enter para omitir): ";
-	cin.ignore(numeric_limits<streamsize>::max(), '\n');
-	getline(cin, comentario);
-
-	// 5. Mostrar resumen y confirmar
-	cout << "\n--- Resumen de calificacion ---\n";
-	cout << "Producto: " << productoSeleccionado->getNombre() << " (codigo " << productoSeleccionado->getCodigo() << ")\n";
-	cout << "Puntaje: " << punt << "/5\n";
-	cout << "Comentario: " << (comentario.empty() ? "(sin comentario)" : comentario) << "\n";
-
-	char confirmacion;
-	cout << "\n¿Confirmar calificacion? (s/n): ";
-	cin >> confirmacion;
-
-	if (confirmacion != 's' && confirmacion != 'S') {
-		cout << "Calificacion cancelada." << endl;
-		return;
-	}
-
-	// 6. Ejecutar calificación
-	bool ok = ctrl.calificarProducto(codigo, p, comentario, correoCliente);
-
-	if (ok) {
-		cout << "\n¡Producto calificado exitosamente!" << endl;
-		cout << "Nuevo puntaje promedio de " << productoSeleccionado->getNombre() << ": "
-			 << productoSeleccionado->getPuntajePromedio() << "/5" << endl;
-	} else {
-		cout << "\nNo se pudo calificar el producto. Ocurrio un error interno." << endl;
+		ResultadoCalificacionCliente resultado = ctrl.registrarCalificacionCliente(correoCliente, codigo, puntaje, comentario);
+		if (resultado.exito) {
+			cout << "\n¡Producto calificado exitosamente!" << endl;
+			cout << "Nuevo puntaje promedio de " << resultado.nombreProducto << ": "
+				 << resultado.puntajePromedioActualizado << "/5" << endl;
+			return;
+		}
+		if (!resultado.productoExiste) {
+			cout << "\nNo existe un producto con el codigo ingresado." << endl;
+		} else if (!resultado.puntajeValido) {
+			cout << "\nPuntaje invalido. Debe ser un numero entre 1 y 5." << endl;
+		} else if (!resultado.productoComprado) {
+			cout << "\nNo puede calificar un producto que no haya comprado." << endl;
+		} else {
+			cout << "\nNo se pudo calificar el producto." << endl;
+		}
+	} catch (const exception& ex) {
+		cout << "Error inesperado: " << ex.what() << endl;
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	} catch (...) {
+		cout << "Error inesperado en la operacion." << endl;
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	}
 }
 
 void MenuCliente::consultarInfoDetalladaProducto() {
-	AdminController* adminCtrl = AdminController::getInstanciaAdmin();
-	if (adminCtrl == nullptr) return;
-
-	auto productos = adminCtrl->listarProductos();
-	if (productos.empty()) {
-		cout << "\nNo hay productos registrados en el catalogo." << endl;
-		return;
-	}
-
-	cout << "\n--- Productos disponibles ---\n";
-	for (Producto* p : productos) {
-		if (p != nullptr) {
-			cout << "  Codigo: " << p->getCodigo()
-				 << " | Nombre: " << p->getNombre() << endl;
+	try {
+		vector<ProductoClienteInfo> productos = ctrl.listarProductosCatalogoCliente();
+		if (productos.empty()) {
+			cout << "\nNo hay productos registrados en el catalogo." << endl;
+			return;
 		}
-	}
 
-	int codigo;
-	cout << "\nIngrese el codigo del producto a consultar (0 para cancelar): ";
-	cin >> codigo;
-
-	if (codigo == 0) {
-		cout << "Operacion cancelada." << endl;
-		return;
-	}
-
-	Producto* producto = adminCtrl->buscarProducto(codigo);
-	if (producto == nullptr) {
-		cout << "Error: No existe un producto con el codigo ingresado." << endl;
-		return;
-	}
-
-	// Mostrar informacion basica
-	cout << "\n========== INFORMACION DETALLADA DEL PRODUCTO ==========\n";
-	cout << "Codigo: " << producto->getCodigo() << endl;
-	cout << "Nombre: " << producto->getNombre() << endl;
-	cout << "Descripcion: " << producto->getDescripcion() << endl;
-
-	string nombreCat = producto->getCategoria() != nullptr ? producto->getCategoria()->getNombre() : "(sin categoria)";
-	cout << "Categoria: " << nombreCat << endl;
-
-	cout << "Precio de venta unitario: $" << producto->getPrecioVentaActual() << endl;
-	cout << "Stock actual: " << producto->getStock() << endl;
-	cout << "Puntaje promedio: " << producto->getPuntajePromedio() << "/5"
-		 << " (" << producto->getCantidadCalificaciones() << " calificaciones)" << endl;
-
-	// Ultimas 5 calificaciones (solo para Cliente)
-	vector<Calificacion*> calificaciones = ctrl.listarCalificacionesDeProducto(codigo);
-	if (!calificaciones.empty()) {
-		cout << "\n--- Ultimas calificaciones ---\n";
-		int mostrar = min(5, (int)calificaciones.size());
-		for (int i = 0; i < mostrar; ++i) {
-			Calificacion* cal = calificaciones[i];
-			if (cal == nullptr) continue;
-
-			DTFecha f = cal->getFecha();
-			string comentario = cal->getComentario();
-
-			cout << (i + 1) << ") Fecha: " << f.getDia() << "/" << f.getMes() << "/" << f.getAnio();
-			cout << " - Puntaje: " << static_cast<int>(cal->getPuntaje()) << "/5";
-			cout << " - Comentario: " << (comentario.empty() ? "(sin comentario)" : comentario) << endl;
+		cout << "\n--- Productos disponibles ---\n";
+		for (const ProductoClienteInfo& p : productos) {
+			cout << "  Codigo: " << p.codigo << " | Nombre: " << p.nombre << endl;
 		}
-	} else {
-		cout << "\nNo hay calificaciones registradas para este producto." << endl;
+
+		int codigo;
+		cout << "\nIngrese el codigo del producto a consultar (0 para cancelar): ";
+		cin >> codigo;
+		if (codigo == 0) {
+			cout << "Operacion cancelada." << endl;
+			return;
+		}
+
+		ResultadoDetalleProductoCliente detalle = ctrl.obtenerDetalleProductoCliente(codigo);
+		if (!detalle.productoExiste) {
+			cout << "Error: No existe un producto con el codigo ingresado." << endl;
+			return;
+		}
+
+		cout << "\n========== INFORMACION DETALLADA DEL PRODUCTO ==========\n";
+		cout << "Codigo: " << detalle.codigo << endl;
+		cout << "Nombre: " << detalle.nombre << endl;
+		cout << "Descripcion: " << detalle.descripcion << endl;
+		cout << "Categoria: " << detalle.categoria << endl;
+		cout << "Precio de venta unitario: $" << detalle.precioVentaUnitario << endl;
+		cout << "Stock actual: " << detalle.stockActual << endl;
+		cout << "Puntaje promedio: " << detalle.puntajePromedio << "/5"
+			 << " (" << detalle.cantidadCalificaciones << " calificaciones)" << endl;
+
+		if (!detalle.ultimasCalificaciones.empty()) {
+			cout << "\n--- Ultimas calificaciones ---\n";
+			for (size_t i = 0; i < detalle.ultimasCalificaciones.size(); ++i) {
+				const CalificacionClienteInfo& cal = detalle.ultimasCalificaciones[i];
+				cout << (i + 1) << ") Fecha: " << cal.fecha.getDia() << "/" << cal.fecha.getMes() << "/" << cal.fecha.getAnio();
+				cout << " - Puntaje: " << cal.puntaje << "/5";
+				cout << " - Comentario: " << (cal.comentario.empty() ? "(sin comentario)" : cal.comentario) << endl;
+			}
+		} else {
+			cout << "\nNo hay calificaciones registradas para este producto." << endl;
+		}
+		cout << "========================================================\n";
+	} catch (const exception& ex) {
+		cout << "Error inesperado: " << ex.what() << endl;
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	} catch (...) {
+		cout << "Error inesperado en la operacion." << endl;
+		cin.clear();
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 	}
-	cout << "========================================================\n";
 }

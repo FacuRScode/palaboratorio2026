@@ -18,6 +18,33 @@ using namespace std;
 // Forward declaration para evitar dependencia circular
 class EmpleadoController;
 
+struct ProveedorProductoInfo {
+	string rutProveedor;
+	string empresaProveedor;
+	int precioCompraPactado;
+	int tiempoEntregaDias;
+};
+
+struct DetalleProductoAdmin {
+	bool productoExiste;
+	Producto* producto;
+	vector<ProveedorProductoInfo> proveedores;
+};
+
+struct ResultadoGestionProveedorProducto {
+	bool exito;
+	bool proveedorExiste;
+	bool productoExiste;
+	bool actualizada;
+};
+
+struct ResultadoAltaEmpleado {
+	bool exito;
+	bool rolValido;
+	bool correoDisponible;
+	string rolAsignado;
+};
+
 class AdminController {
 private:
 	static AdminController* instanciaAdmin;
@@ -25,12 +52,14 @@ private:
 	vector<Categoria*> categorias;
 	vector<Empleado*> empleados;
 	vector<Proveedor*> proveedores;
+	EmpleadoController* empleadoCtrlRef;
 
 public:
 	AdminController();
 	~AdminController();
 
 	static AdminController* getInstanciaAdmin();
+	void setEmpleadoController(EmpleadoController* empleadoController);
 
 	// -- Productos -------------------------------------------------
 	Producto* crearProducto(int codigo, const string& nombre, const string& descripcion,
@@ -42,6 +71,9 @@ public:
 	bool eliminarProducto(int codigo, bool eliminarAsociaciones = false);
 	bool productoAsociadoAProveedor(int codigoProducto) const;
 	vector<Producto*> listarProductos() const;
+	vector<Producto*> listarProductosPorCategoria(const string& nombreCategoria) const;
+	vector<Producto*> listarProductosConStockBajo(bool ordenarPorCriticidad) const;
+	DetalleProductoAdmin obtenerDetalleProductoAdmin(int codigoProducto) const;
 
 	// -- Categorías -----------------------------------------------
 	Categoria* crearCategoria(const string& nombre, const string& descripcion);
@@ -54,6 +86,8 @@ public:
 	// -- Empleados -----------------------------------------------
 	Empleado* crearEmpleado(const string& nombre, const string& correo,
 							 const string& contrasena, const string& rol);
+	ResultadoAltaEmpleado crearEmpleadoConRolOpcion(const string& nombre, const string& correo,
+													const string& contrasena, int opcionRol);
 	Empleado* buscarEmpleado(const string& correo) const;
 	bool eliminarEmpleado(const string& correo);
 	vector<Empleado*> listarEmpleados() const;
@@ -72,6 +106,11 @@ public:
 	ProveedorProducto* buscarAsociacion(const string& rutProveedor, int codigoProducto) const;
 	bool asociarProveedorProducto(const string& rutProveedor, int codigoProducto,
 								  int precioCompra, int tiempoEntrega);
+	bool actualizarAsociacionProveedorProducto(const string& rutProveedor, int codigoProducto,
+											   int nuevoPrecioCompra, int nuevoTiempoEntrega);
+	ResultadoGestionProveedorProducto gestionarAsociacionProveedorProducto(const string& rutProveedor, int codigoProducto,
+																		  int precioCompra, int tiempoEntrega);
+	bool existeProveedorProducto(const string& rutProveedor, int codigoProducto) const;
 	vector<ProveedorProducto*> listarAsociacionesDeProducto(int codigoProducto) const;
 };
 

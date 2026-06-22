@@ -1,8 +1,7 @@
 #include "MenuEmpleado.h"
 #include <iostream>
 #include <limits>
-#include <algorithm>
-#include <ctime>
+#include <exception>
 
 using namespace std;
 
@@ -11,1034 +10,793 @@ MenuEmpleado::MenuEmpleado(EmpleadoController& controller, AuthController* auth,
 
 void MenuEmpleado::mostrar() {
 	while (true) {
-		auto adminCtrl = AdminController::getInstanciaAdmin();
-		auto empleadoCtrl = EmpleadoController::getInstanciaEmpleado();
-		cout << "\n--- Menu Empleado ---\n";
-		if (authCtrl && authCtrl->haySesionActiva()) {
-			Sesion s = authCtrl->getSesionActual();
-			cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
+		try {
+			cout << "\n--- Menu Empleado ---\n";
+			if (authCtrl && authCtrl->haySesionActiva()) {
+				Sesion s = authCtrl->getSesionActual();
+				cout << "Usuario: " << s.nombre << " (" << s.rol << ")\n";
+			}
+			cout << "1. Registrar cliente\n";
+			cout << "2. Modificar cliente\n";
+			cout << "3. Registrar venta\n";
+			cout << "4. Historial de compras de cliente\n";
+			cout << "5. Emitir orden de compra\n";
+			cout << "6. Cancelar orden de compra\n";
+			cout << "7. Registrar recepcion de orden de compra\n";
+			cout << "8. Consultar calificaciones de producto\n";
+			cout << "9. Consultar stock actual de productos\n";
+			cout << "10. Consultar productos con stock bajo minimo\n";
+			cout << "11. Consultar monto facturado a cliente\n";
+			cout << "12. Consultar unidades vendidas de un producto\n";
+			cout << "13. Consultar informacion detallada de un producto\n";
+			cout << "0. Cerrar sesion\n";
+
+			int op;
+			cout << "Seleccione una opcion: ";
+			cin >> op;
+
+			if (op == 0) {
+				if (authCtrl) authCtrl->cerrarSesion();
+				cout << "Sesion cerrada." << endl;
+				return;
+			}
+			if (op == 1) registrarCliente();
+			else if (op == 2) modificarCliente();
+			else if (op == 3) registrarVenta();
+			else if (op == 4) historialComprasCliente();
+			else if (op == 5) emitirOrdenCompra();
+			else if (op == 6) cancelarOrdenCompra();
+			else if (op == 7) registrarRecepcionOrdenCompra();
+			else if (op == 8) consultarCalificacionesProducto();
+			else if (op == 9) consultarStockProductos();
+			else if (op == 10) consultarProductosStockBajo();
+			else if (op == 11) consultarMontoFacturadoCliente();
+			else if (op == 12) consultarUnidadesVendidasProducto();
+			else if (op == 13) consultarInfoDetalladaProducto();
+			else cout << "Opcion invalida." << endl;
+		} catch (const exception& ex) {
+			cout << "Error inesperado: " << ex.what() << endl;
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		} catch (...) {
+			cout << "Error inesperado en la operacion." << endl;
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		}
-		cout << "1. Registrar cliente\n";
-		cout << "2. Modificar cliente\n";
-		cout << "3. Registrar venta\n";
-		cout << "4. Historial de compras de cliente\n";
-		cout << "5. Emitir orden de compra\n";
-		cout << "6. Cancelar orden de compra\n";
-		cout << "7. Registrar recepcion de orden de compra\n";
-		cout << "8. Consultar calificaciones de producto\n";
-		cout << "9. Consultar stock actual de productos\n";
-		cout << "10. Consultar productos con stock bajo minimo\n";
-		cout << "11. Consultar monto facturado a cliente\n";
-		cout << "12. Consultar unidades vendidas de un producto\n";
-		cout << "13. Consultar informacion detallada de un producto\n";
-		cout << "0. Cerrar sesion\n";
-		int op;
-		cout << "Seleccione una opcion: ";
-		cin >> op;
-		if (op == 0) {
-			if (authCtrl) authCtrl->cerrarSesion();
-			cout << "Sesion cerrada." << endl;
+	}
+}
+
+void MenuEmpleado::registrarCliente() {
+	try {
+		string rut, nombre, apellido, direccion, correo, contrasena;
+		char respuesta;
+		cout << "RUT: "; cin >> rut;
+		cout << "Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nombre);
+		cout << "Apellido: "; getline(cin, apellido);
+		cout << "Direccion: "; getline(cin, direccion);
+		cout << "Correo: "; getline(cin, correo);
+		cout << "Contrasena: "; getline(cin, contrasena);
+
+		cout << "\nResumen del registro:\n";
+		cout << "RUT: " << rut << endl;
+		cout << "Nombre Completo: " << nombre << " " << apellido << endl;
+		cout << "Direccion: " << direccion << endl;
+		cout << "Correo: " << correo << endl;
+		cout << "Contrasena: " << contrasena << endl;
+		cout << "¿Desea confirmar el registro? (s/n): "; cin >> respuesta;
+		if (respuesta != 's' && respuesta != 'S') {
+			cout << "Registro cancelado." << endl;
 			return;
-		} else if (op == 1) {
-			string rut, nombre, apellido, direccion, correo, contrasena;
-			char respuesta;
-			cout << "RUT: "; cin >> rut;
-			cout << "Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nombre);
-			cout << "Apellido: "; getline(cin, apellido);
-			cout << "Direccion: "; getline(cin, direccion);
-			cout << "Correo: "; getline(cin, correo);
-			cout << "Contrasena: "; getline(cin, contrasena);
-			cout << "\n Resumen del registro: " << endl;
-			cout << "RUT: " << rut << endl;
-			cout << "Nombre Completo: " << nombre << " " << apellido << endl;
-			cout << "Direccion: " << direccion << endl;
-			cout << "Correo: " << correo << endl;
-			cout << "Contrasena: " << contrasena <<endl;
-			cout << "¿Desea confirmar el registro? (s/n): "; cin >> respuesta;
-			if(respuesta == 's'){
-				Cliente* nuevo = empleadoCtrl->registrarCliente(rut, nombre, apellido, direccion, correo, contrasena);
-				if (nuevo != nullptr) {
-					cout << "Cliente registrado con exito."<<endl;
-				} else {
-					cout << "Error: El RUT o el correo ya estan registrados en el sistema."<<endl;
-				}
-			}
-			else{
-				cout << "Registro cancelado."<<endl;
-			}
-		} else if (op == 2) {
-			string rut, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo;
-            char respuesta;
-            Cliente* cliente = nullptr;
-			while(true){
-				cout << "RUT: "; cin >> rut;
-				cliente = empleadoCtrl->buscarCliente(rut);
-				if(cliente == nullptr){
-					cout<<"Error: No existe un cliente con ese RUT."<<endl;
-					cout<<"¿Desea intentarlo con otro RUT? (s/n): "; cin >> respuesta;
-					if (respuesta == 'n') {
-            			cout << "Modificacion cancelada." << endl;
-            			return;
-						}
-       			 cout << endl;
-   				} else {
-      				break;
-				}
-			}
-			cout << "\n Datos actuales del cliente:" << endl;
-   			cout << "Nombre Completo: " << cliente->getNombre() << " " << cliente->getApellido() << endl;
-    		cout << "Direccion: " << cliente->getDireccion() << endl;
-    		cout << "Correo: " << cliente->getCorreo() << endl;
+		}
 
-			cout << "Nuevo Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nuevoNombre);
-    		cout << "Nuevo Apellido: "; getline(cin, nuevoApellido);
-			cout << "Nueva Direccion: "; getline(cin, nuevaDireccion);
-			cout << "Correo: "; getline(cin, nuevoCorreo);
-			cout << "\n Resumen de la edicion: " << endl;
-			cout << "Nombre Completo: " << nuevoNombre << " " << nuevoApellido << endl;
-			cout << "Direccion: " << nuevaDireccion << endl;
-			cout << "Correo: " << nuevoCorreo << endl;
-			cout << "¿Desea confirmar la modificacion? (s/n): "; cin >> respuesta;
-            if(respuesta == 's'){
-                if (empleadoCtrl->modificaCliente(cliente, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo)) {
-                    cout << "Cliente modificado con exito." << endl;
-                } else {
-                    cout << "Error: El correo ya pertenece a otro cliente. Modificacion cancelada." << endl;
-                }
-            } else {
-                cout << "Modificacion cancelada. Se conservan los datos originales." << endl;
-            }
-		} else if (op == 3) {
-		    string rut = "";
-            char respuesta;
-            int cantidad, codigoProducto;
-            Cliente* cliente = nullptr;
-            Producto* producto = nullptr;
-            Venta* venta = nullptr;
+		Cliente* nuevo = ctrl.registrarCliente(rut, nombre, apellido, direccion, correo, contrasena);
+		if (nuevo != nullptr) cout << "Cliente registrado con exito." << endl;
+		else cout << "Error: El RUT o el correo ya estan registrados en el sistema." << endl;
+	} catch (const exception& ex) {
+		cout << "Error al registrar cliente: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al registrar cliente." << endl;
+	}
+}
 
-            // Obtener fecha y hora actual del sistema
-            time_t t = time(nullptr);
-            tm* now = localtime(&t);
-            DTFecha fechaSistema(now->tm_mday, now->tm_mon + 1, now->tm_year + 1900);
-            DTHora horaSistema(now->tm_hour, now->tm_min, now->tm_sec);
+void MenuEmpleado::modificarCliente() {
+	try {
+		string rut, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo;
+		char respuesta;
 
-            cout << "¿El cliente esta registrado? (s/n): "; cin >> respuesta;
-            if (respuesta == 's' || respuesta == 'S') {
-                while (true) {
-                    cout << "RUT: "; cin >> rut;
-                    cliente = empleadoCtrl->buscarCliente(rut);
-                    if (cliente == nullptr) {
-                        cout << "Error: No existe un cliente con ese RUT." << endl;
-                        cout << "¿Desea intentarlo con otro RUT? (s/n): "; cin >> respuesta;
-                        if (respuesta == 'n' || respuesta == 'N') {
-                            cout << "Registro cancelado." << endl;
-                            return;
-                        }
-                        cout << endl;
-                    } else {
-                        break;
-                    }
-                }
-                venta = empleadoCtrl->crearVenta(rut, fechaSistema, horaSistema);
-            } else {
-                // Cliente ocasional
-                venta = empleadoCtrl->crearVentaOcasional(fechaSistema, horaSistema);
-            }
+		cout << "RUT: "; cin >> rut;
+		Cliente* cliente = ctrl.buscarCliente(rut);
+		if (cliente == nullptr) {
+			cout << "Error: No existe un cliente con ese RUT." << endl;
+			return;
+		}
 
-            if (venta == nullptr) {
-                cout << "Error al crear la venta." << endl;
-                return;
-            }
+		cout << "\nDatos actuales del cliente:" << endl;
+		cout << "Nombre Completo: " << cliente->getNombre() << " " << cliente->getApellido() << endl;
+		cout << "Direccion: " << cliente->getDireccion() << endl;
+		cout << "Correo: " << cliente->getCorreo() << endl;
 
-            do {
-                while (true) {
-                    cout << "\nIngrese codigo del producto: "; cin >> codigoProducto;
-                    producto = adminCtrl->buscarProducto(codigoProducto);
-                    if (producto == nullptr) {
-                        cout << "Error: No existe un producto con ese codigo." << endl;
-                        cout << "¿Desea intentarlo con otro codigo? (s/n): "; cin >> respuesta;
-                        if (respuesta == 'n' || respuesta == 'N') {
-                            cout << "Registro cancelado." << endl;
-                            delete venta;
-			                return;
-                        }
-                        cout << endl;
-                    } else {
-                        break;
-                    }
-                }
+		cout << "Nuevo Nombre: "; cin.ignore(numeric_limits<streamsize>::max(), '\n'); getline(cin, nuevoNombre);
+		cout << "Nuevo Apellido: "; getline(cin, nuevoApellido);
+		cout << "Nueva Direccion: "; getline(cin, nuevaDireccion);
+		cout << "Nuevo Correo: "; getline(cin, nuevoCorreo);
 
-                cout << "Stock disponible: " << producto->getStock() << endl;
-                cout << "Precio unitario: $" << producto->getPrecioVentaActual() << endl;
+		cout << "\nResumen de la edicion:\n";
+		cout << "Nombre Completo: " << nuevoNombre << " " << nuevoApellido << endl;
+		cout << "Direccion: " << nuevaDireccion << endl;
+		cout << "Correo: " << nuevoCorreo << endl;
+		cout << "¿Desea confirmar la modificacion? (s/n): "; cin >> respuesta;
+		if (respuesta != 's' && respuesta != 'S') {
+			cout << "Modificacion cancelada. Se conservan los datos originales." << endl;
+			return;
+		}
 
-                cout << "Ingrese la cantidad: "; cin >> cantidad;
+		if (ctrl.modificaCliente(cliente, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo)) {
+			cout << "Cliente modificado con exito." << endl;
+		} else {
+			cout << "Error: El correo ya pertenece a otro cliente. Modificacion cancelada." << endl;
+		}
+	} catch (const exception& ex) {
+		cout << "Error al modificar cliente: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al modificar cliente." << endl;
+	}
+}
 
-                if (empleadoCtrl->agregarLineaAVenta(venta, codigoProducto, cantidad)) {
-                    cout << "Linea agregada con exito." << endl;
-                } else {
-                    cout << "Error: No hay stock suficiente o el producto no existe, linea no agregada." << endl;
-                }
+void MenuEmpleado::registrarVenta() {
+	try {
+		char esRegistrado;
+		cout << "¿El cliente esta registrado? (s/n): ";
+		cin >> esRegistrado;
 
-                cout << "¿Desea seguir ingresando lineas de detalle? (s/n): "; cin >> respuesta;
-            } while (respuesta == 's' || respuesta == 'S');
+		bool clienteRegistrado = (esRegistrado == 's' || esRegistrado == 'S');
+		string rutCliente;
+		if (clienteRegistrado) {
+			cout << "RUT del cliente: ";
+			cin >> rutCliente;
+		}
 
-            // Actualizar fecha/hora al momento de confirmar
-            t = time(nullptr);
-            now = localtime(&t);
-            venta->setFecha(DTFecha(now->tm_mday, now->tm_mon + 1, now->tm_year + 1900));
-            venta->setHora(DTHora(now->tm_hour, now->tm_min, now->tm_sec));
+		vector<pair<int, int>> lineas;
+		while (true) {
+			int codigoProducto;
+			int cantidad;
+			cout << "\nIngrese codigo del producto (0 para finalizar): ";
+			cin >> codigoProducto;
+			if (codigoProducto == 0) break;
+			cout << "Ingrese la cantidad: ";
+			cin >> cantidad;
+			lineas.push_back({codigoProducto, cantidad});
+		}
 
-            string nombreCliente = (cliente != nullptr) ? (cliente->getNombre() + " " + cliente->getApellido()) : "Ocasional";
-            cout << "\nResumen de venta: " << endl;
-            cout << " Cliente: " << (cliente != nullptr ? rut : "Ocasional") << " (" << nombreCliente << ")" << endl;
-            cout << " Total: $" << venta->calcularTotal() << endl;
-            cout << " Fecha/Hora: " << venta->getFecha().getDia() << "/" << venta->getFecha().getMes() << "/" << venta->getFecha().getAnio()
-			<< " " << venta->getHora().getHora() << ":" << venta->getHora().getMinuto() << ":" << venta->getHora().getSegundo() << endl;
+		cout << "¿Desea confirmar esta venta? (s/n): ";
+		char confirmar;
+		cin >> confirmar;
+		if (confirmar != 's' && confirmar != 'S') {
+			cout << "Venta cancelada." << endl;
+			return;
+		}
 
-            cout << "¿Desea confirmar esta venta? (s/n): "; cin >> respuesta;
+		ResultadoRegistroVenta res = ctrl.registrarVentaCompleta(rutCliente, clienteRegistrado, lineas);
+		if (!res.exito) {
+			if (!res.clienteValido) cout << "Error: No existe un cliente con el RUT ingresado." << endl;
+			else if (!res.lineasValidas) cout << "Error: Debe ingresar al menos una linea valida." << endl;
+			else if (!res.productoValido) cout << "Error: Uno o mas productos no existen." << endl;
+			else if (!res.stockSuficiente) cout << "Error: No hay stock suficiente para uno o mas productos." << endl;
+			else cout << "Error al registrar la venta." << endl;
+			return;
+		}
 
-            if (respuesta == 's' || respuesta == 'S') {
-                empleadoCtrl->confirmarVenta(venta);
-                cout << "Venta registrada con exito." << endl;
-            } else {
-                cout << "Venta cancelada." << endl;
-                delete venta;
-            }
+		cout << "\nResumen de venta:" << endl;
+		cout << "Cliente: " << (res.clienteRegistrado ? res.rutCliente : "Ocasional")
+			 << " (" << res.nombreCliente << ")" << endl;
+		for (const auto& linea : res.lineas) {
+			cout << "  Producto: " << linea.nombreProducto << " (codigo=" << linea.codigoProducto << ")"
+				 << " | Cantidad: " << linea.cantidad
+				 << " | P. Unitario: $" << linea.precioUnitario
+				 << " | Subtotal: $" << linea.subtotal << endl;
+		}
+		cout << "Total: $" << res.total << endl;
+		cout << "Fecha/Hora: " << res.fecha.getDia() << "/" << res.fecha.getMes() << "/" << res.fecha.getAnio()
+			 << " " << res.hora.getHora() << ":" << res.hora.getMinuto() << ":" << res.hora.getSegundo() << endl;
+		cout << "Venta registrada con exito." << endl;
+	} catch (const exception& ex) {
+		cout << "Error al registrar venta: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al registrar venta." << endl;
+	}
+}
 
-		}else if (op == 4){
-			string rut;
-			char respuesta;
-			Cliente* cliente = nullptr;
-			while(true){
-				cout << "RUT: "; cin >> rut;
-				cliente = empleadoCtrl->buscarCliente(rut);
-				if(cliente == nullptr){
-					cout<<"Error: No existe un cliente con ese RUT."<<endl;
-					cout<<"¿Desea intentarlo con otro RUT? (s/n): "; cin >> respuesta;
-					if (respuesta == 'n') {
-            			cout << "Operacion cancelada." << endl;
-            			return;
-						}
-       			 cout << endl;
-   				} else {
-					break;
-				}
-			}
-			auto ventas = empleadoCtrl->listarVentasPorCliente(rut);
-			if (ventas.empty()) {
-            cout << "El cliente " << cliente->getNombre() << " no registra compras en el sistema." << endl;
-            return;
-        }
+void MenuEmpleado::historialComprasCliente() {
+	try {
+		string rut;
+		cout << "RUT: ";
+		cin >> rut;
 
-        sort(ventas.begin(), ventas.end(), [](Venta* a, Venta* b) {
-   			DTFecha fa = a->getFecha();
-    		DTFecha fb = b->getFecha();
-    		DTHora ha = a->getHora();
-    		DTHora hb = b->getHora();
+		ResultadoHistorialCliente res = ctrl.obtenerHistorialComprasCliente(rut);
+		if (!res.clienteExiste) {
+			cout << "Error: No existe un cliente con ese RUT." << endl;
+			return;
+		}
+		if (res.ventas.empty()) {
+			cout << "El cliente " << res.nombreCliente << " no registra compras en el sistema." << endl;
+			return;
+		}
 
-		    if (fa.getAnio() != fb.getAnio()) {
-    		    return fa.getAnio() > fb.getAnio();
-    		}
-
-    		if (fa.getMes() != fb.getMes()) {
-        		return fa.getMes() > fb.getMes();
-    		}
-
-    		if (fa.getDia() != fb.getDia()) {
-        		return fa.getDia() > fb.getDia();
-    		}
-
-    		if (ha.getHora() != hb.getHora()) {
-        		return ha.getHora() > hb.getHora();
-    		}
-
-    		if (ha.getMinuto() != hb.getMinuto()) {
-        		return ha.getMinuto() > hb.getMinuto();
-    		}
-
-		    return ha.getSegundo() > hb.getSegundo();
-		});
-
-        cout << "\nHistorial de compras: " << cliente->getNombre() << " " << cliente->getApellido() << endl;
+		cout << "\nHistorial de compras: " << res.nombreCliente << endl;
 		cout << "------------------------------------------------" << endl;
-
-		for (size_t i = 0; i < ventas.size(); ++i) {
-    		cout << (i + 1) << ") ";
-    		cout << "Fecha: " << ventas[i]->getFecha().getDia() << "/"
-        		 << ventas[i]->getFecha().getMes() << "/"
-        		 << ventas[i]->getFecha().getAnio();
-    		cout << " Hora: " << ventas[i]->getHora().getHora() << ":"
-        		 << ventas[i]->getHora().getMinuto() << ":"
-        		 << ventas[i]->getHora().getSegundo();
-    		cout << " - " << ventas[i]->getDetalle().size() << " lineas - Total: $"
-        		 << ventas[i]->calcularTotal() << endl;
+		for (size_t i = 0; i < res.ventas.size(); ++i) {
+			const auto& v = res.ventas[i];
+			cout << (i + 1) << ") Fecha: " << v.fecha.getDia() << "/" << v.fecha.getMes() << "/" << v.fecha.getAnio()
+				 << " Hora: " << v.hora.getHora() << ":" << v.hora.getMinuto() << ":" << v.hora.getSegundo()
+				 << " - " << v.lineas.size() << " lineas - Total: $" << v.total << endl;
 		}
-        int seleccion;
-        cout << "\nSeleccione el numero de una venta para ver su detalle (0 para salir): ";
-        cin >> seleccion;
 
-        if (seleccion > 0 && seleccion <= static_cast<int>(ventas.size())) {
-            Venta* ventaSeleccionada = ventas[seleccion - 1];
-
-            cout << "\nDetalle de la venta N° " << seleccion << endl;
-            cout << "Fecha: " << ventaSeleccionada->getFecha().getDia() << "/"
-            	 << ventaSeleccionada->getFecha().getMes() << "/"
-         	 	 << ventaSeleccionada->getFecha().getAnio();
-            cout << " Hora: " << ventaSeleccionada->getHora().getHora() << ":"
-            	 << ventaSeleccionada->getHora().getMinuto() << ":"
-            	 << ventaSeleccionada->getHora().getSegundo() << endl;
-
-            for (auto linea : ventaSeleccionada->getDetalle()) {
-                Producto* prod = linea->getProducto();
-                double precioAplicado = linea->getPrecioUnitario();
-                int cant = linea->getCantidad();
-                double subtotal = cant * precioAplicado;
-
-				string nombreProd = prod != nullptr ? prod->getNombre() : "(producto eliminado)";
-				string strCodigo = prod != nullptr ? to_string(prod->getCodigo()) : "-";
-
-                cout << "  Producto: " << nombreProd << " (codigo=" << strCodigo << ")" << endl;
-                cout << "  Cantidad: " << cant << " | P. Unitario: $" << precioAplicado
-                     << " | Subtotal: $" << subtotal << endl;
-            }
-            cout << "  -----------------------------------------" << endl;
-            cout << "  Total compra: $" << ventaSeleccionada->calcularTotal() << endl;
-        } else {
-            cout << "Regresando al menu de opciones..." << endl;
-        }
-		} else if (op == 5) {
-			int cantidad, codigoProducto;
-			string rutProveedor;
-			char respuesta;
-			Producto* producto = nullptr;
-			Proveedor* proveedor = nullptr;
-			OrdenDeCompra* orden = nullptr;
-			ProveedorProducto* pp = nullptr;
-
-			// Obtener fecha y hora actual del sistema
-			time_t t = time(nullptr);
-			tm* now = localtime(&t);
-			DTFecha fechaSistema(now->tm_mday, now->tm_mon + 1, now->tm_year + 1900);
-
-			auto proveedores = adminCtrl->listarProveedores();
-			if (proveedores.empty()) {
-				cout << "No hay proveedores registrados en el sistema." << endl;
-				return;
-			}
-			while(true){
-				cout << "Elija un proveedor por su RUT: "; cin >> rutProveedor;
-				proveedor = adminCtrl->buscarProveedor(rutProveedor);
-				if(proveedor == nullptr){
-					cout << "Error: No existe un proveedor con ese RUT." << endl;
-					cout << "¿Desea intentar con otro RUT? (s/n): "; cin >> respuesta;
-					if(respuesta == 'n' || respuesta == 'N'){
-						cout << "Operacion cancelada." << endl;
-						return;
-					}
-				} else {
-					break;
-				}
-			}
-			orden = empleadoCtrl->crearOrdenDeCompra(fechaSistema, Estado::Pendiente, fechaSistema, proveedor);
-			do{
-				bool cancelar = false;
-				while(true){
-					// Mostrar productos que el proveedor puede abastecer
-					auto productosOfrecidos = proveedor->getProductosOfrecidos();
-					cout << "\nProductos que abastece " << proveedor->getEmpresa() << ":" << endl;
-					for (size_t i = 0; i < productosOfrecidos.size(); ++i) {
-						ProveedorProducto* pProd = productosOfrecidos[i];
-						if (pProd != nullptr && pProd->getProducto() != nullptr) {
-							cout << "  Codigo: " << pProd->getProducto()->getCodigo()
-								 << " | " << pProd->getProducto()->getNombre()
-								 << " | Precio: $" << pProd->getPrecioCompraPactado()
-								 << " | Entrega: " << pProd->getTiempoEntregaEstimadoEnDias() << " dias" << endl;
-						}
-					}
-					cout << "Seleccione el codigo del producto (0 para cancelar): "; cin >> codigoProducto;
-					if (codigoProducto == 0) {
-						cancelar = true;
-						break;
-					}
-					producto = adminCtrl->buscarProducto(codigoProducto);
-					if(producto == nullptr){
-						cout << "Error: El producto no existe." << endl;
-						cout << "¿Desea intentar con otro codigo? (s/n): "; cin >> respuesta;
-						if (respuesta == 'n' || respuesta == 'N') {
-							cancelar = true;
-							break;
-						}
-						continue;
-					}
-					pp = adminCtrl->buscarAsociacion(rutProveedor, codigoProducto);
-					if(pp == nullptr){
-						cout << "Error: El proveedor no tiene este producto." << endl;
-						cout << "¿Desea intentar con otro codigo? (s/n): "; cin >> respuesta;
-						if (respuesta == 'n' || respuesta == 'N') {
-							cancelar = true;
-							break;
-						}
-						continue;
-					}
-					break;
-				}
-				if (cancelar) break;
-
-				cout << "Indique la cantidad pedida: "; cin >> cantidad;
-				cout << "Precio de compra pactado: $" << pp->getPrecioCompraPactado() << endl;
-				cout << "Tiempo de entrega estimado: " << pp->getTiempoEntregaEstimadoEnDias() << " dias" << endl;
-				empleadoCtrl->agregarLineaDetalleCompra(orden, cantidad, producto);
-				cout << "Linea agregada con exito a la orden." << endl;
-	    		cout << "\n¿Desea seguir ingresando lineas de detalle a la orden? (s/n): "; cin >> respuesta;
-        	} while (respuesta == 's' || respuesta == 'S');
-        	cout << "\nResumen de orden de compra: " << endl;
-        	cout << " Proveedor: " << proveedor->getEmpresa() << " (RUT: " << rutProveedor << ")" << endl;
-        	cout << " Fecha Emision: " << fechaSistema.getDia() << "/"
-             	 << fechaSistema.getMes() << "/"
-             	 << fechaSistema.getAnio() << endl;
-        	cout << " Cant. Lineas: " << orden->getDetalleCompra().size() << endl;
-        	cout << " Total Estimado: $" << orden->calcularTotal() << endl;
-        	cout << "¿Desea confirmar esta orden de compra? (s/n): "; cin >> respuesta;
-        	if (respuesta == 's' || respuesta == 'S') {
-            	empleadoCtrl->agregarOrdenDeCompra(orden);
-            	cout << "La orden de compra ha sido registrada con estado 'Pendiente'." << endl;
-        	} else {
-            	cout << "Operacion cancelada. Orden descartada." << endl;
-            	delete orden;
-        	}
-        	} else if (op == 6) {
-			// Cancelar orden de compra
-			auto pendientes = empleadoCtrl->listarOrdenesPendientes();
-			if (pendientes.empty()) {
-				cout << "\nNo hay ordenes de compra en estado 'Pendiente'." << endl;
-				return;
-			}
-
-			cout << "\n--- Ordenes de compra pendientes ---\n";
-			for (size_t i = 0; i < pendientes.size(); ++i) {
-				OrdenDeCompra* o = pendientes[i];
-				if (o == nullptr) continue;
-				string nomEmpresa = o->getProveedor() != nullptr ? o->getProveedor()->getEmpresa() : "(sin proveedor)";
-				DTFecha fe = o->getFechaEmision();
-				cout << "  ID " << i << " | Proveedor: " << nomEmpresa
-					 << " | Fecha Emision: " << fe.getDia() << "/" << fe.getMes() << "/" << fe.getAnio()
-					 << " | Lineas: " << o->getDetalleCompra().size() << endl;
-			}
-
-			int id;
-			cout << "\nIngrese el ID de la orden a cancelar: ";
-			cin >> id;
-
-			if (id < 0 || id >= static_cast<int>(pendientes.size())) {
-				cout << "Error: ID invalido." << endl;
-				return;
-			}
-
-			OrdenDeCompra* ordenSeleccionada = pendientes[id];
-
-			// Mostrar detalle completo
-			cout << "\n--- Detalle de la orden de compra ---\n";
-			cout << "Proveedor: " << (ordenSeleccionada->getProveedor() != nullptr ? ordenSeleccionada->getProveedor()->getEmpresa() : "N/A") << endl;
-			DTFecha fe = ordenSeleccionada->getFechaEmision();
-			cout << "Fecha de emision: " << fe.getDia() << "/" << fe.getMes() << "/" << fe.getAnio() << endl;
-			cout << "Estado: Pendiente" << endl;
-			cout << "Lineas de la orden:\n";
-			for (size_t j = 0; j < ordenSeleccionada->getDetalleCompra().size(); ++j) {
-				LineaDetalleCompra* linea = ordenSeleccionada->getDetalleCompra()[j];
-				if (linea == nullptr) continue;
-				Producto* prod = linea->getProducto();
-				string nombreProd = prod != nullptr ? prod->getNombre() : "(producto eliminado)";
-				cout << "  " << (j + 1) << ". Producto: " << nombreProd
-					 << " | Cantidad: " << linea->getCantidad() << endl;
-			}
-			cout << "Total estimado: $" << ordenSeleccionada->calcularTotal() << endl;
-
-			char confirmar;
-			cout << "\n¿Esta seguro de cancelar esta orden de compra? (s/n): ";
-			cin >> confirmar;
-
-			if (confirmar == 's' || confirmar == 'S') {
-				empleadoCtrl->cancelarOrdenDeCompra(ordenSeleccionada);
-				cout << "La orden de compra ha sido cancelada." << endl;
-				cout << "Nota: Una orden cancelada no generara movimiento de stock." << endl;
-			} else {
-				cout << "Operacion cancelada. No se realizaron cambios." << endl;
-			}
-		} else if (op == 7) {
-			// Registrar recepcion de orden de compra
-			auto pendientes = empleadoCtrl->listarOrdenesPendientes();
-			if (pendientes.empty()) {
-				cout << "\nNo hay ordenes de compra en estado 'Pendiente'." << endl;
-				return;
-			}
-
-			cout << "\n--- Ordenes de compra pendientes ---\n";
-			for (size_t i = 0; i < pendientes.size(); ++i) {
-				OrdenDeCompra* o = pendientes[i];
-				if (o == nullptr) continue;
-				string nomEmpresa = o->getProveedor() != nullptr ? o->getProveedor()->getEmpresa() : "(sin proveedor)";
-				DTFecha fe = o->getFechaEmision();
-				cout << "  ID " << i << " | Proveedor: " << nomEmpresa
-					 << " | Fecha Emision: " << fe.getDia() << "/" << fe.getMes() << "/" << fe.getAnio() << endl;
-			}
-
-			int id;
-			cout << "\nIngrese el ID de la orden recibida: ";
-			cin >> id;
-
-			if (id < 0 || id >= static_cast<int>(pendientes.size())) {
-				cout << "Error: ID invalido." << endl;
-				return;
-			}
-
-			OrdenDeCompra* ordenSeleccionada = pendientes[id];
-
-			// Mostrar detalle de la orden
-			auto& detalle = ordenSeleccionada->getDetalleCompra();
-			cout << "\n--- Detalle de la orden de compra ---\n";
-			cout << "Proveedor: " << (ordenSeleccionada->getProveedor() != nullptr ? ordenSeleccionada->getProveedor()->getEmpresa() : "N/A") << endl;
-			DTFecha fe = ordenSeleccionada->getFechaEmision();
-			cout << "Fecha de emision: " << fe.getDia() << "/" << fe.getMes() << "/" << fe.getAnio() << endl;
-			cout << "\nProductos y cantidades pedidas:\n";
-			for (size_t j = 0; j < detalle.size(); ++j) {
-				if (detalle[j] == nullptr) continue;
-				Producto* prod = detalle[j]->getProducto();
-				string nombreProd = prod != nullptr ? prod->getNombre() : "(producto eliminado)";
-				cout << "  " << (j + 1) << ". " << nombreProd
-					 << " - Cantidad pedida: " << detalle[j]->getCantidad() << endl;
-			}
-
-			// Solicitar cantidades recibidas (pueden haber diferencias)
-			vector<int> cantidadesRecibidas;
-			cout << "\n--- Ingrese las cantidades recibidas ---\n";
-			for (size_t j = 0; j < detalle.size(); ++j) {
-				if (detalle[j] == nullptr) continue;
-				Producto* prod = detalle[j]->getProducto();
-				string nombreProd = prod != nullptr ? prod->getNombre() : "(producto eliminado)";
-				int cant;
-				cout << "  " << nombreProd << " (pedido: " << detalle[j]->getCantidad() << "): ";
-				cin >> cant;
-				if (cant < 0) cant = 0;
-				cantidadesRecibidas.push_back(cant);
-			}
-
-			// Mostrar resumen
-			cout << "\n--- Resumen de recepcion ---\n";
-			cout << "Proveedor: " << (ordenSeleccionada->getProveedor() != nullptr ? ordenSeleccionada->getProveedor()->getEmpresa() : "N/A") << endl;
-			for (size_t j = 0; j < detalle.size(); ++j) {
-				if (detalle[j] == nullptr) continue;
-				Producto* prod = detalle[j]->getProducto();
-				string nombreProd = prod != nullptr ? prod->getNombre() : "(producto eliminado)";
-				cout << "  " << nombreProd << ": pedido " << detalle[j]->getCantidad()
-					 << " | recibido " << cantidadesRecibidas[j] << endl;
-			}
-
-			char confirmar;
-			cout << "\n¿Desea confirmar la recepcion de esta orden? (s/n): ";
-			cin >> confirmar;
-
-			if (confirmar == 's' || confirmar == 'S') {
-				// Obtener fecha y hora actual del sistema
-				time_t t = time(nullptr);
-				tm* now = localtime(&t);
-				DTFecha fechaSistema(now->tm_mday, now->tm_mon + 1, now->tm_year + 1900);
-
-				bool ok = empleadoCtrl->registrarRecepcionOrden(ordenSeleccionada, cantidadesRecibidas, fechaSistema);
-				if (ok) {
-					cout << "\nRecepcion registrada con exito." << endl;
-					cout << "La orden ha pasado al estado 'Recibida'." << endl;
-					cout << "El stock de los productos ha sido actualizado." << endl;
-				} else {
-					cout << "\nError al registrar la recepcion." << endl;
-				}
-			} else {
-				cout << "Operacion cancelada. No se realizaron cambios." << endl;
-			}
-		} else if (op == 8) {
-			consultarCalificacionesProducto();
-		} else if (op == 9) {
-			consultarStockProductos();
-		} else if (op == 10) {
-			consultarProductosStockBajo();
-		} else if (op == 11) {
-			consultarMontoFacturadoCliente();
-		} else if (op == 12) {
-			consultarUnidadesVendidasProducto();
-		} else if (op == 13) {
-			consultarInfoDetalladaProducto();
+		int seleccion;
+		cout << "\nSeleccione el numero de una venta para ver su detalle (0 para salir): ";
+		cin >> seleccion;
+		if (seleccion <= 0 || seleccion > static_cast<int>(res.ventas.size())) {
+			cout << "Regresando al menu de opciones..." << endl;
+			return;
 		}
+
+		const auto& venta = res.ventas[seleccion - 1];
+		cout << "\nDetalle de la venta N° " << seleccion << endl;
+		cout << "Fecha: " << venta.fecha.getDia() << "/" << venta.fecha.getMes() << "/" << venta.fecha.getAnio()
+			 << " Hora: " << venta.hora.getHora() << ":" << venta.hora.getMinuto() << ":" << venta.hora.getSegundo() << endl;
+		for (const auto& linea : venta.lineas) {
+			cout << "  Producto: " << linea.nombreProducto << " (codigo=" << linea.codigoProducto << ")" << endl;
+			cout << "  Cantidad: " << linea.cantidad << " | P. Unitario: $" << linea.precioUnitario
+				 << " | Subtotal: $" << linea.subtotal << endl;
+		}
+		cout << "  -----------------------------------------" << endl;
+		cout << "  Total compra: $" << venta.total << endl;
+	} catch (const exception& ex) {
+		cout << "Error al consultar historial: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar historial." << endl;
+	}
+}
+
+void MenuEmpleado::emitirOrdenCompra() {
+	try {
+		string rutProveedor;
+		cout << "RUT del proveedor: ";
+		cin >> rutProveedor;
+
+		ResultadoProductosProveedor productosProveedor = ctrl.obtenerProductosProveedor(rutProveedor);
+		if (!productosProveedor.proveedorExiste) {
+			cout << "Error: No existe un proveedor con ese RUT." << endl;
+			return;
+		}
+		if (productosProveedor.productos.empty()) {
+			cout << "El proveedor no tiene productos asociados." << endl;
+			return;
+		}
+
+		cout << "\nProductos que abastece " << productosProveedor.empresaProveedor << ":" << endl;
+		for (const auto& p : productosProveedor.productos) {
+			cout << "  Codigo: " << p.codigoProducto
+				 << " | " << p.nombreProducto
+				 << " | Precio: $" << p.precioCompraPactado
+				 << " | Entrega: " << p.tiempoEntregaDias << " dias" << endl;
+		}
+
+		vector<pair<int, int>> lineas;
+		while (true) {
+			int codigoProducto;
+			int cantidad;
+			cout << "\nSeleccione el codigo del producto (0 para finalizar): ";
+			cin >> codigoProducto;
+			if (codigoProducto == 0) break;
+			cout << "Cantidad pedida: ";
+			cin >> cantidad;
+			lineas.push_back({codigoProducto, cantidad});
+		}
+
+		cout << "¿Desea confirmar esta orden de compra? (s/n): ";
+		char confirmar;
+		cin >> confirmar;
+		if (confirmar != 's' && confirmar != 'S') {
+			cout << "Operacion cancelada." << endl;
+			return;
+		}
+
+		ResultadoOrdenCompra res = ctrl.emitirOrdenCompra(rutProveedor, lineas);
+		if (!res.exito) {
+			if (!res.proveedorExiste) cout << "Error: Proveedor invalido." << endl;
+			else if (!res.lineasValidas) cout << "Error: Debe ingresar lineas validas para la orden." << endl;
+			else if (!res.productoValido) cout << "Error: Uno o mas productos no existen." << endl;
+			else if (!res.productoAsociadoProveedor) cout << "Error: Uno o mas productos no estan asociados al proveedor." << endl;
+			else cout << "Error al registrar la orden de compra." << endl;
+			return;
+		}
+
+		cout << "\nResumen de orden de compra:" << endl;
+		cout << "Proveedor: " << res.empresaProveedor << " (RUT: " << res.rutProveedor << ")" << endl;
+		cout << "Fecha Emision: " << res.fechaEmision.getDia() << "/" << res.fechaEmision.getMes()
+			 << "/" << res.fechaEmision.getAnio() << endl;
+		cout << "Cant. Lineas: " << res.cantidadLineas << endl;
+		cout << "Total Estimado: $" << res.totalEstimado << endl;
+		cout << "La orden de compra ha sido registrada con estado 'Pendiente'." << endl;
+	} catch (const exception& ex) {
+		cout << "Error al emitir orden de compra: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al emitir orden de compra." << endl;
+	}
+}
+
+void MenuEmpleado::cancelarOrdenCompra() {
+	try {
+		vector<OrdenPendienteInfo> pendientes = ctrl.listarOrdenesPendientesInfo();
+		if (pendientes.empty()) {
+			cout << "\nNo hay ordenes de compra en estado 'Pendiente'." << endl;
+			return;
+		}
+
+		cout << "\n--- Ordenes de compra pendientes ---\n";
+		for (const auto& orden : pendientes) {
+			cout << "  ID " << orden.id
+				 << " | Proveedor: " << orden.empresaProveedor
+				 << " | Fecha Emision: " << orden.fechaEmision.getDia() << "/" << orden.fechaEmision.getMes() << "/" << orden.fechaEmision.getAnio()
+				 << " | Lineas: " << orden.cantidadLineas << endl;
+		}
+
+		int id;
+		cout << "\nIngrese el ID de la orden a cancelar: ";
+		cin >> id;
+
+		DetalleOrdenPendiente detalle = ctrl.obtenerDetalleOrdenPendiente(id);
+		if (!detalle.idValido || !detalle.exito) {
+			cout << "Error: ID invalido." << endl;
+			return;
+		}
+
+		cout << "\n--- Detalle de la orden de compra ---\n";
+		cout << "Proveedor: " << detalle.resumen.empresaProveedor << endl;
+		cout << "Fecha de emision: " << detalle.resumen.fechaEmision.getDia() << "/"
+			 << detalle.resumen.fechaEmision.getMes() << "/"
+			 << detalle.resumen.fechaEmision.getAnio() << endl;
+		cout << "Estado: Pendiente" << endl;
+		cout << "Lineas de la orden:\n";
+		for (size_t i = 0; i < detalle.lineas.size(); ++i) {
+			cout << "  " << (i + 1) << ". Producto: " << detalle.lineas[i].nombreProducto
+				 << " | Cantidad: " << detalle.lineas[i].cantidad << endl;
+		}
+		cout << "Total estimado: $" << detalle.resumen.totalEstimado << endl;
+
+		char confirmar;
+		cout << "\n¿Esta seguro de cancelar esta orden de compra? (s/n): ";
+		cin >> confirmar;
+		if (confirmar != 's' && confirmar != 'S') {
+			cout << "Operacion cancelada. No se realizaron cambios." << endl;
+			return;
+		}
+
+		ResultadoCancelarOrden cancelacion = ctrl.cancelarOrdenPendiente(id);
+		if (cancelacion.exito) {
+			cout << "La orden de compra ha sido cancelada." << endl;
+			cout << "Nota: Una orden cancelada no generara movimiento de stock." << endl;
+		} else {
+			cout << "Error al cancelar la orden." << endl;
+		}
+	} catch (const exception& ex) {
+		cout << "Error al cancelar orden: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al cancelar orden." << endl;
+	}
+}
+
+void MenuEmpleado::registrarRecepcionOrdenCompra() {
+	try {
+		vector<OrdenPendienteInfo> pendientes = ctrl.listarOrdenesPendientesInfo();
+		if (pendientes.empty()) {
+			cout << "\nNo hay ordenes de compra en estado 'Pendiente'." << endl;
+			return;
+		}
+
+		cout << "\n--- Ordenes de compra pendientes ---\n";
+		for (const auto& orden : pendientes) {
+			cout << "  ID " << orden.id
+				 << " | Proveedor: " << orden.empresaProveedor
+				 << " | Fecha Emision: " << orden.fechaEmision.getDia() << "/" << orden.fechaEmision.getMes() << "/" << orden.fechaEmision.getAnio() << endl;
+		}
+
+		int id;
+		cout << "\nIngrese el ID de la orden recibida: ";
+		cin >> id;
+
+		DetalleOrdenPendiente detalle = ctrl.obtenerDetalleOrdenPendiente(id);
+		if (!detalle.idValido || !detalle.exito) {
+			cout << "Error: ID invalido." << endl;
+			return;
+		}
+
+		cout << "\n--- Detalle de la orden de compra ---\n";
+		cout << "Proveedor: " << detalle.resumen.empresaProveedor << endl;
+		cout << "Fecha de emision: " << detalle.resumen.fechaEmision.getDia() << "/"
+			 << detalle.resumen.fechaEmision.getMes() << "/"
+			 << detalle.resumen.fechaEmision.getAnio() << endl;
+		cout << "\nProductos y cantidades pedidas:\n";
+		for (size_t i = 0; i < detalle.lineas.size(); ++i) {
+			cout << "  " << (i + 1) << ". " << detalle.lineas[i].nombreProducto
+				 << " - Cantidad pedida: " << detalle.lineas[i].cantidad << endl;
+		}
+
+		vector<int> cantidadesRecibidas;
+		cout << "\n--- Ingrese las cantidades recibidas ---\n";
+		for (const auto& linea : detalle.lineas) {
+			int cant;
+			cout << "  " << linea.nombreProducto << " (pedido: " << linea.cantidad << "): ";
+			cin >> cant;
+			cantidadesRecibidas.push_back(cant);
+		}
+
+		cout << "\n--- Resumen de recepcion ---\n";
+		cout << "Proveedor: " << detalle.resumen.empresaProveedor << endl;
+		for (size_t i = 0; i < detalle.lineas.size(); ++i) {
+			cout << "  " << detalle.lineas[i].nombreProducto
+				 << ": pedido " << detalle.lineas[i].cantidad
+				 << " | recibido " << cantidadesRecibidas[i] << endl;
+		}
+
+		char confirmar;
+		cout << "\n¿Desea confirmar la recepcion de esta orden? (s/n): ";
+		cin >> confirmar;
+		if (confirmar != 's' && confirmar != 'S') {
+			cout << "Operacion cancelada. No se realizaron cambios." << endl;
+			return;
+		}
+
+		ResultadoRegistrarRecepcionOrden recepcion = ctrl.registrarRecepcionOrdenPendiente(id, cantidadesRecibidas);
+		if (!recepcion.idValido) {
+			cout << "Error: ID invalido." << endl;
+		} else if (!recepcion.cantidadesValidas) {
+			cout << "Error: Cantidades recibidas invalidas." << endl;
+		} else if (recepcion.exito) {
+			cout << "\nRecepcion registrada con exito." << endl;
+			cout << "La orden ha pasado al estado 'Recibida'." << endl;
+			cout << "El stock de los productos ha sido actualizado." << endl;
+		} else {
+			cout << "\nError al registrar la recepcion." << endl;
+		}
+	} catch (const exception& ex) {
+		cout << "Error al registrar recepcion: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al registrar recepcion." << endl;
 	}
 }
 
 void MenuEmpleado::consultarStockProductos() {
-	AdminController* adminCtrl = AdminController::getInstanciaAdmin();
-	if (adminCtrl == nullptr) return;
+	try {
+		char filtrar;
+		cout << "\n¿Desea filtrar por categoria? (s/n): ";
+		cin >> filtrar;
 
-	char filtrar;
-	cout << "\n¿Desea filtrar por categoria? (s/n): ";
-	cin >> filtrar;
+		vector<StockProductoEmpleadoInfo> productos;
+		if (filtrar == 's' || filtrar == 'S') {
+			vector<CategoriaEmpleadoInfo> categorias = ctrl.listarCategoriasEmpleado();
+			if (categorias.empty()) {
+				cout << "\nNo hay categorias registradas en el sistema." << endl;
+				return;
+			}
 
-	vector<Producto*> productos;
+			cout << "\n--- Categorias disponibles ---\n";
+			for (size_t i = 0; i < categorias.size(); ++i) {
+				cout << "  " << (i + 1) << ". " << categorias[i].nombre
+					 << ": " << categorias[i].descripcion << endl;
+			}
 
-	if (filtrar == 's' || filtrar == 'S') {
-		auto categorias = adminCtrl->listarCategorias();
-		if (categorias.empty()) {
-			cout << "\nNo hay categorias registradas en el sistema." << endl;
-			return;
-		}
+			int opcion;
+			cout << "\nSeleccione una categoria (1-" << categorias.size() << "): ";
+			cin >> opcion;
+			if (opcion < 1 || opcion > static_cast<int>(categorias.size())) {
+				cout << "Opcion invalida." << endl;
+				return;
+			}
 
-		cout << "\n--- Categorias disponibles ---\n";
-		for (size_t i = 0; i < categorias.size(); ++i) {
-			if (categorias[i] != nullptr) {
-				cout << "  " << (i + 1) << ". " << categorias[i]->getNombre()
-					 << ": " << categorias[i]->getDescripcion() << endl;
+			productos = ctrl.listarStockProductosVista(categorias[opcion - 1].nombre);
+			if (productos.empty()) {
+				cout << "\nNo hay productos en la categoria seleccionada." << endl;
+				return;
+			}
+		} else {
+			productos = ctrl.listarStockProductosVista();
+			if (productos.empty()) {
+				cout << "\nNo hay productos registrados en el catalogo." << endl;
+				return;
 			}
 		}
 
-		int opcion;
-		cout << "\nSeleccione una categoria (1-" << categorias.size() << "): ";
-		cin >> opcion;
+		cout << "\n--- Stock actual de productos ---\n";
+		cout << "Codigo  | Nombre                          | Categoria               | Stock Actual | Stock Minimo\n";
+		cout << "--------|---------------------------------|-------------------------|--------------|--------------\n";
+		for (const StockProductoEmpleadoInfo& p : productos) {
+			cout << p.codigo << "\t| " << p.nombre;
+			for (int i = static_cast<int>(p.nombre.length()); i < 31; ++i) cout << " ";
+			cout << "| " << p.categoria;
+			for (int i = static_cast<int>(p.categoria.length()); i < 23; ++i) cout << " ";
+			cout << "| " << p.stockActual;
+			for (int i = static_cast<int>(to_string(p.stockActual).length()); i < 12; ++i) cout << " ";
+			cout << "| " << p.stockMinimo << endl;
+		}
+		cout << "---------------------------------------------------------------------\n";
+	} catch (const exception& ex) {
+		cout << "Error al consultar stock: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar stock." << endl;
+	}
+}
 
-		if (opcion < 1 || opcion > static_cast<int>(categorias.size())) {
-			cout << "Opcion invalida." << endl;
+void MenuEmpleado::consultarProductosStockBajo() {
+	try {
+		char ordenar;
+		cout << "\n¿Ordenar por diferencia ascendente (mas criticos primero)? (s/n): ";
+		cin >> ordenar;
+
+		vector<StockProductoEmpleadoInfo> productosBajos = ctrl.listarProductosStockBajoVista(ordenar == 's' || ordenar == 'S');
+		if (productosBajos.empty()) {
+			cout << "\nNo hay productos con stock por debajo del minimo configurado." << endl;
 			return;
 		}
 
-		string nombreCategoria = categorias[opcion - 1]->getNombre();
-		auto todos = adminCtrl->listarProductos();
+		cout << "\n--- Productos con stock bajo minimo ---\n";
+		cout << "Codigo  | Nombre                          | Categoria               | Stock Actual | Stock Minimo | Diferencia\n";
+		cout << "--------|---------------------------------|-------------------------|--------------|--------------|------------\n";
+		for (const StockProductoEmpleadoInfo& p : productosBajos) {
+			int diferencia = p.stockMinimo - p.stockActual;
+			string strCodigo = to_string(p.codigo);
+			string strStock = to_string(p.stockActual);
+			string strStockMin = to_string(p.stockMinimo);
+			string strDiff = to_string(diferencia);
 
-		for (Producto* p : todos) {
-			if (p != nullptr && p->getCategoria() != nullptr &&
-				p->getCategoria()->getNombre() == nombreCategoria) {
-				productos.push_back(p);
-			}
+			cout << strCodigo;
+			for (int i = static_cast<int>(strCodigo.length()); i < 8; ++i) cout << " ";
+			cout << "| " << p.nombre;
+			for (int i = static_cast<int>(p.nombre.length()); i < 31; ++i) cout << " ";
+			cout << "| " << p.categoria;
+			for (int i = static_cast<int>(p.categoria.length()); i < 23; ++i) cout << " ";
+			cout << "| " << strStock;
+			for (int i = static_cast<int>(strStock.length()); i < 12; ++i) cout << " ";
+			cout << "| " << strStockMin;
+			for (int i = static_cast<int>(strStockMin.length()); i < 12; ++i) cout << " ";
+			cout << "| " << strDiff << " (faltan " << diferencia << ")" << endl;
 		}
+		cout << "----------------------------------------------------------------------------\n";
+	} catch (const exception& ex) {
+		cout << "Error al consultar stock bajo: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar stock bajo." << endl;
+	}
+}
 
-		if (productos.empty()) {
-			cout << "\nNo hay productos en la categoria \"" << nombreCategoria << "\"." << endl;
+void MenuEmpleado::consultarCalificacionesProducto() {
+	try {
+		if (ventaCtrl == nullptr) {
+			cout << "Error: Controlador de ventas no disponible." << endl;
 			return;
 		}
-	} else {
-		productos = adminCtrl->listarProductos();
+
+		vector<ProductoClienteInfo> productos = ventaCtrl->listarProductosCatalogoCliente();
 		if (productos.empty()) {
 			cout << "\nNo hay productos registrados en el catalogo." << endl;
 			return;
 		}
-	}
 
-	cout << "\n--- Stock actual de productos ---\n";
-	cout << "Codigo  | Nombre                          | Categoria               | Stock Actual | Stock Minimo\n";
-	cout << "--------|---------------------------------|-------------------------|--------------|--------------\n";
-
-	for (Producto* p : productos) {
-		if (p == nullptr) continue;
-
-		string nombreCat = p->getCategoria() != nullptr ? p->getCategoria()->getNombre() : "(sin categoria)";
-
-		// Formatear con anchors
-		cout << p->getCodigo() << "\t| " << p->getNombre();
-		// Padding para alinear
-		for (int i = p->getNombre().length(); i < 31; ++i) cout << " ";
-		cout << "| " << nombreCat;
-		for (int i = nombreCat.length(); i < 23; ++i) cout << " ";
-		cout << "| " << p->getStock();
-		for (int i = to_string(p->getStock()).length(); i < 12; ++i) cout << " ";
-		cout << "| " << p->getStockMinimo() << endl;
-	}
-	cout << "---------------------------------------------------------------------\n";
-}
-
-void MenuEmpleado::consultarProductosStockBajo() {
-	AdminController* adminCtrl = AdminController::getInstanciaAdmin();
-	if (adminCtrl == nullptr) return;
-
-	auto todos = adminCtrl->listarProductos();
-	if (todos.empty()) {
-		cout << "\nNo hay productos registrados en el catalogo." << endl;
-		return;
-	}
-
-	// Filtrar productos con stock < stock minimo
-	vector<Producto*> productosBajos;
-	for (Producto* p : todos) {
-		if (p != nullptr && p->getStock() < p->getStockMinimo()) {
-			productosBajos.push_back(p);
+		cout << "\n--- Catalogo de productos ---\n";
+		for (const ProductoClienteInfo& p : productos) {
+			cout << "  Codigo: " << p.codigo
+				 << " | Nombre: " << p.nombre << endl;
 		}
-	}
 
-	if (productosBajos.empty()) {
-		cout << "\nNo hay productos con stock por debajo del minimo configurado." << endl;
-		return;
-	}
-
-	// Preguntar si desea ordenar por diferencia ascendente
-	char ordenar;
-	cout << "\n¿Ordenar por diferencia ascendente (mas criticos primero)? (s/n): ";
-	cin >> ordenar;
-
-	if (ordenar == 's' || ordenar == 'S') {
-		sort(productosBajos.begin(), productosBajos.end(), [](Producto* a, Producto* b) {
-			int diffA = a->getStockMinimo() - a->getStock();
-			int diffB = b->getStockMinimo() - b->getStock();
-			return diffA > diffB; // mayor diferencia = mas critico primero
-		});
-	}
-
-	cout << "\n--- Productos con stock bajo minimo ---\n";
-	cout << "Codigo  | Nombre                          | Categoria               | Stock Actual | Stock Minimo | Diferencia\n";
-	cout << "--------|---------------------------------|-------------------------|--------------|--------------|------------\n";
-
-	for (Producto* p : productosBajos) {
-		if (p == nullptr) continue;
-
-		string nombreCat = p->getCategoria() != nullptr ? p->getCategoria()->getNombre() : "(sin categoria)";
-		string strCodigo = to_string(p->getCodigo());
-		string strStock = to_string(p->getStock());
-		string strStockMin = to_string(p->getStockMinimo());
-		int diferencia = p->getStockMinimo() - p->getStock();
-		string strDiff = to_string(diferencia);
-
-		cout << strCodigo;
-		for (int i = strCodigo.length(); i < 8; ++i) cout << " ";
-		cout << "| " << p->getNombre();
-		for (int i = p->getNombre().length(); i < 31; ++i) cout << " ";
-		cout << "| " << nombreCat;
-		for (int i = nombreCat.length(); i < 23; ++i) cout << " ";
-		cout << "| " << strStock;
-		for (int i = strStock.length(); i < 12; ++i) cout << " ";
-		cout << "| " << strStockMin;
-		for (int i = strStockMin.length(); i < 12; ++i) cout << " ";
-		cout << "| " << strDiff;
-		cout << " (faltan " << diferencia << ")" << endl;
-	}
-	cout << "----------------------------------------------------------------------------\n";
-}
-
-void MenuEmpleado::consultarCalificacionesProducto() {
-	if (ventaCtrl == nullptr) {
-		cout << "Error: Controlador de ventas no disponible." << endl;
-		return;
-	}
-
-	AdminController* adminCtrl = AdminController::getInstanciaAdmin();
-	if (adminCtrl == nullptr) return;
-
-	vector<Producto*> productos = adminCtrl->listarProductos();
-	if (productos.empty()) {
-		cout << "\nNo hay productos registrados en el catalogo." << endl;
-		return;
-	}
-
-	cout << "\n--- Catalogo de productos ---\n";
-	for (Producto* p : productos) {
-		if (p != nullptr) {
-			cout << "  Codigo: " << p->getCodigo()
-				 << " | Nombre: " << p->getNombre()
-				 << " | Puntaje promedio: " << p->getPuntajePromedio() << "/5"
-				 << " (" << p->getCantidadCalificaciones() << " calificaciones)" << endl;
+		int codigo;
+		cout << "\nIngrese el codigo del producto a consultar (0 para cancelar): ";
+		cin >> codigo;
+		if (codigo == 0) {
+			cout << "Operacion cancelada." << endl;
+			return;
 		}
+
+		ResultadoCalificacionesProductoVista resultado = ventaCtrl->obtenerCalificacionesProductoVista(codigo);
+		if (!resultado.productoExiste) {
+			cout << "No existe un producto con el codigo ingresado." << endl;
+			return;
+		}
+
+		if (resultado.calificaciones.empty()) {
+			cout << "\nEl producto \"" << resultado.nombreProducto << "\" no tiene calificaciones registradas." << endl;
+			cout << "Puntaje promedio: " << resultado.puntajePromedio << "/5" << endl;
+			return;
+		}
+
+		cout << "\n--- Calificaciones de \"" << resultado.nombreProducto << "\" ---\n";
+		cout << "Puntaje promedio general: " << resultado.puntajePromedio << "/5"
+			 << " (basado en " << resultado.calificaciones.size() << " calificaciones)" << endl;
+		cout << "--------------------------------------------------------\n";
+		for (size_t i = 0; i < resultado.calificaciones.size(); ++i) {
+			const CalificacionEmpleadoVistaInfo& cal = resultado.calificaciones[i];
+			cout << (i + 1) << ") Fecha: " << cal.fecha.getDia() << "/" << cal.fecha.getMes() << "/" << cal.fecha.getAnio()
+				 << " | Puntaje: " << cal.puntaje << "/5"
+				 << " | Cliente RUT: " << cal.rutCliente
+				 << " | Comentario: " << (cal.comentario.empty() ? "(sin comentario)" : cal.comentario) << endl;
+		}
+		cout << "--------------------------------------------------------\n";
+	} catch (const exception& ex) {
+		cout << "Error al consultar calificaciones: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar calificaciones." << endl;
 	}
-
-	int codigo;
-	cout << "\nIngrese el codigo del producto a consultar (0 para cancelar): ";
-	cin >> codigo;
-
-	if (codigo == 0) {
-		cout << "Operacion cancelada." << endl;
-		return;
-	}
-
-	Producto* producto = adminCtrl->buscarProducto(codigo);
-	if (producto == nullptr) {
-		cout << "No existe un producto con el codigo ingresado." << endl;
-		return;
-	}
-
-	vector<Calificacion*> calificaciones = ventaCtrl->listarCalificacionesDeProducto(codigo);
-
-	if (calificaciones.empty()) {
-		cout << "\nEl producto \"" << producto->getNombre() << "\" no tiene calificaciones registradas." << endl;
-		cout << "Puntaje promedio: " << producto->getPuntajePromedio() << "/5" << endl;
-		return;
-	}
-
-	cout << "\n--- Calificaciones de \"" << producto->getNombre() << "\" ---\n";
-	cout << "Puntaje promedio general: " << producto->getPuntajePromedio() << "/5"
-		 << " (basado en " << calificaciones.size() << " calificaciones)" << endl;
-	cout << "--------------------------------------------------------\n";
-
-	for (size_t i = 0; i < calificaciones.size(); ++i) {
-		Calificacion* cal = calificaciones[i];
-		if (cal == nullptr) continue;
-
-		DTFecha f = cal->getFecha();
-		string comentario = cal->getComentario();
-		Cliente* cli = cal->getClienteCalificador();
-
-		cout << (i + 1) << ") Fecha: " << f.getDia() << "/" << f.getMes() << "/" << f.getAnio()
-			 << " | Puntaje: " << static_cast<int>(cal->getPuntaje()) << "/5"
-			 << " | Cliente RUT: " << (cli != nullptr ? cli->getRut() : "N/A")
-			 << " | Comentario: " << (comentario.empty() ? "(sin comentario)" : comentario) << endl;
-	}
-	cout << "--------------------------------------------------------\n";
 }
 
 void MenuEmpleado::consultarMontoFacturadoCliente() {
-	EmpleadoController* empleadoCtrl = EmpleadoController::getInstanciaEmpleado();
-	if (empleadoCtrl == nullptr) {
-		cout << "Error: Controlador de empleados no disponible." << endl;
-		return;
-	}
+	try {
+		string rut;
+		cout << "\nIngrese el RUT del cliente: ";
+		cin >> rut;
 
-	string rut;
-	cout << "\nIngrese el RUT del cliente: ";
-	cin >> rut;
-
-	Cliente* cliente = empleadoCtrl->buscarCliente(rut);
-	if (cliente == nullptr) {
-		cout << "Error: No existe un cliente con el RUT ingresado." << endl;
-		return;
-	}
-
-	int diaInicio, mesInicio, anioInicio;
-	int diaFin, mesFin, anioFin;
-
-	// Solicitar fecha de inicio
-	cout << "\nFecha de inicio del periodo:" << endl;
-	cout << "Dia: "; cin >> diaInicio;
-	cout << "Mes: "; cin >> mesInicio;
-	cout << "Anio: "; cin >> anioInicio;
-	DTFecha inicio(diaInicio, mesInicio, anioInicio);
-
-	// Solicitar fecha de fin
-	cout << "\nFecha de fin del periodo:" << endl;
-	cout << "Dia: "; cin >> diaFin;
-	cout << "Mes: "; cin >> mesFin;
-	cout << "Anio: "; cin >> anioFin;
-	DTFecha fin(diaFin, mesFin, anioFin);
-
-	// Validar que inicio <= fin
-	while (!(inicio <= fin)) {
-		cout << "\nError: La fecha de inicio debe ser anterior o igual a la fecha de fin." << endl;
-		cout << "1. Reingresar las fechas" << endl;
-		cout << "2. Cancelar" << endl;
-		int opcion;
-		cout << "Seleccione una opcion: ";
-		cin >> opcion;
-		if (opcion == 2) {
-			cout << "Operacion cancelada." << endl;
-			return;
-		}
-
+		int diaInicio, mesInicio, anioInicio;
+		int diaFin, mesFin, anioFin;
 		cout << "\nFecha de inicio del periodo:" << endl;
 		cout << "Dia: "; cin >> diaInicio;
 		cout << "Mes: "; cin >> mesInicio;
 		cout << "Anio: "; cin >> anioInicio;
-		inicio = DTFecha(diaInicio, mesInicio, anioInicio);
+		DTFecha inicio(diaInicio, mesInicio, anioInicio);
 
 		cout << "\nFecha de fin del periodo:" << endl;
 		cout << "Dia: "; cin >> diaFin;
 		cout << "Mes: "; cin >> mesFin;
 		cout << "Anio: "; cin >> anioFin;
-		fin = DTFecha(diaFin, mesFin, anioFin);
-	}
+		DTFecha fin(diaFin, mesFin, anioFin);
 
-	// Consultar facturacion
-	ResultadoFacturacion res = empleadoCtrl->consultarMontoFacturado(rut, inicio, fin);
+		ResultadoFacturacionConsulta consulta = ctrl.consultarMontoFacturadoValidado(rut, inicio, fin);
+		if (!consulta.rangoFechasValido) {
+			cout << "Error: La fecha de inicio debe ser anterior o igual a la fecha de fin." << endl;
+			return;
+		}
+		if (!consulta.datos.clienteExiste) {
+			cout << "Error: No existe un cliente con el RUT ingresado." << endl;
+			return;
+		}
 
-	// Mostrar resultados
-	cout << "\n--- Resultados de facturacion ---" << endl;
-	cout << "Cliente: " << cliente->getNombre() << " " << cliente->getApellido()
-		 << " (RUT: " << rut << ")" << endl;
-	cout << "Periodo: " << diaInicio << "/" << mesInicio << "/" << anioInicio
-		 << " - " << diaFin << "/" << mesFin << "/" << anioFin << endl;
-	cout << "------------------------------------------------" << endl;
-	cout << "Monto total facturado: $" << res.montoTotal << endl;
-	cout << "Cantidad de ventas: " << res.cantidadVentas << endl;
-	if (res.cantidadVentas > 0) {
-		cout << "Monto promedio por venta: $" << res.montoPromedio << endl;
+		string nombreCliente = ctrl.obtenerNombreClientePorRut(rut);
+		cout << "\n--- Resultados de facturacion ---" << endl;
+		cout << "Cliente: " << (!nombreCliente.empty() ? nombreCliente : rut)
+			 << " (RUT: " << rut << ")" << endl;
+		cout << "Periodo: " << diaInicio << "/" << mesInicio << "/" << anioInicio
+			 << " - " << diaFin << "/" << mesFin << "/" << anioFin << endl;
+		cout << "------------------------------------------------" << endl;
+		cout << "Monto total facturado: $" << consulta.datos.montoTotal << endl;
+		cout << "Cantidad de ventas: " << consulta.datos.cantidadVentas << endl;
+		if (consulta.datos.cantidadVentas > 0) {
+			cout << "Monto promedio por venta: $" << consulta.datos.montoPromedio << endl;
+		}
+		cout << "------------------------------------------------" << endl;
+	} catch (const exception& ex) {
+		cout << "Error al consultar facturacion: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar facturacion." << endl;
 	}
-	cout << "------------------------------------------------" << endl;
 }
 
 void MenuEmpleado::consultarUnidadesVendidasProducto() {
-	EmpleadoController* empleadoCtrl = EmpleadoController::getInstanciaEmpleado();
-	if (empleadoCtrl == nullptr) {
-		cout << "Error: Controlador de empleados no disponible." << endl;
-		return;
-	}
-
-	AdminController* adminCtrl = AdminController::getInstanciaAdmin();
-	if (adminCtrl == nullptr) return;
-
-	// Listar todos los productos
-	auto productos = adminCtrl->listarProductos();
-	if (productos.empty()) {
-		cout << "\nNo hay productos registrados en el catalogo." << endl;
-		return;
-	}
-
-	cout << "\n--- Productos disponibles ---\n";
-	for (Producto* p : productos) {
-		if (p != nullptr) {
-			cout << "  Codigo: " << p->getCodigo()
-				 << " | Nombre: " << p->getNombre() << endl;
+	try {
+		vector<ProductoEmpleadoInfo> productos = ctrl.listarProductosEmpleado();
+		if (productos.empty()) {
+			cout << "\nNo hay productos registrados en el catalogo." << endl;
+			return;
 		}
-	}
 
-	int codigoProducto;
-	cout << "\nIngrese el codigo del producto (0 para cancelar): ";
-	cin >> codigoProducto;
+		cout << "\n--- Productos disponibles ---\n";
+		for (const ProductoEmpleadoInfo& p : productos) {
+			cout << "  Codigo: " << p.codigo << " | Nombre: " << p.nombre << endl;
+		}
 
-	if (codigoProducto == 0) {
-		cout << "Operacion cancelada." << endl;
-		return;
-	}
-
-	Producto* producto = adminCtrl->buscarProducto(codigoProducto);
-	if (producto == nullptr) {
-		cout << "Error: No existe un producto con el codigo ingresado." << endl;
-		return;
-	}
-
-	// Solicitar fechas
-	int diaInicio, mesInicio, anioInicio;
-	int diaFin, mesFin, anioFin;
-
-	cout << "\nFecha de inicio del periodo:" << endl;
-	cout << "Dia: "; cin >> diaInicio;
-	cout << "Mes: "; cin >> mesInicio;
-	cout << "Anio: "; cin >> anioInicio;
-	DTFecha inicio(diaInicio, mesInicio, anioInicio);
-
-	cout << "\nFecha de fin del periodo:" << endl;
-	cout << "Dia: "; cin >> diaFin;
-	cout << "Mes: "; cin >> mesFin;
-	cout << "Anio: "; cin >> anioFin;
-	DTFecha fin(diaFin, mesFin, anioFin);
-
-	// Validar que inicio <= fin
-	while (!(inicio <= fin)) {
-		cout << "\nError: La fecha de inicio debe ser anterior o igual a la fecha de fin." << endl;
-		cout << "1. Reingresar las fechas" << endl;
-		cout << "2. Cancelar" << endl;
-		int opcion;
-		cout << "Seleccione una opcion: ";
-		cin >> opcion;
-		if (opcion == 2) {
+		int codigoProducto;
+		cout << "\nIngrese el codigo del producto (0 para cancelar): ";
+		cin >> codigoProducto;
+		if (codigoProducto == 0) {
 			cout << "Operacion cancelada." << endl;
 			return;
 		}
 
+		int diaInicio, mesInicio, anioInicio;
+		int diaFin, mesFin, anioFin;
 		cout << "\nFecha de inicio del periodo:" << endl;
 		cout << "Dia: "; cin >> diaInicio;
 		cout << "Mes: "; cin >> mesInicio;
 		cout << "Anio: "; cin >> anioInicio;
-		inicio = DTFecha(diaInicio, mesInicio, anioInicio);
+		DTFecha inicio(diaInicio, mesInicio, anioInicio);
 
 		cout << "\nFecha de fin del periodo:" << endl;
 		cout << "Dia: "; cin >> diaFin;
 		cout << "Mes: "; cin >> mesFin;
 		cout << "Anio: "; cin >> anioFin;
-		fin = DTFecha(diaFin, mesFin, anioFin);
-	}
+		DTFecha fin(diaFin, mesFin, anioFin);
 
-	// Consultar unidades vendidas
-	ResultadoUnidadesVendidas res = empleadoCtrl->consultarUnidadesVendidas(codigoProducto, inicio, fin);
+		ResultadoUnidadesVendidasConsulta consulta = ctrl.consultarUnidadesVendidasValidado(codigoProducto, inicio, fin);
+		if (!consulta.rangoFechasValido) {
+			cout << "Error: La fecha de inicio debe ser anterior o igual a la fecha de fin." << endl;
+			return;
+		}
+		if (!consulta.productoExiste) {
+			cout << "Error: No existe un producto con el codigo ingresado." << endl;
+			return;
+		}
 
-	// Mostrar resultados
-	cout << "\n--- Resultados de unidades vendidas ---" << endl;
-	cout << "Producto: " << producto->getNombre() << " (codigo=" << codigoProducto << ")" << endl;
-	cout << "Periodo: " << diaInicio << "/" << mesInicio << "/" << anioInicio
-		 << " - " << diaFin << "/" << mesFin << "/" << anioFin << endl;
-	cout << "------------------------------------------------" << endl;
-	cout << "Total de unidades vendidas: " << res.totalUnidadesVendidas << endl;
-	cout << "Cantidad de ventas en las que participo: " << res.cantidadVentas << endl;
-	if (res.totalUnidadesVendidas > 0) {
-		cout << "Precio unitario promedio: $" << res.precioUnitarioPromedio << endl;
+		string nombreProducto = ctrl.obtenerNombreProductoPorCodigo(codigoProducto);
+		cout << "\n--- Resultados de unidades vendidas ---" << endl;
+		cout << "Producto: " << (!nombreProducto.empty() ? nombreProducto : "(desconocido)")
+			 << " (codigo=" << codigoProducto << ")" << endl;
+		cout << "Periodo: " << diaInicio << "/" << mesInicio << "/" << anioInicio
+			 << " - " << diaFin << "/" << mesFin << "/" << anioFin << endl;
+		cout << "------------------------------------------------" << endl;
+		cout << "Total de unidades vendidas: " << consulta.datos.totalUnidadesVendidas << endl;
+		cout << "Cantidad de ventas en las que participo: " << consulta.datos.cantidadVentas << endl;
+		if (consulta.datos.totalUnidadesVendidas > 0) {
+			cout << "Precio unitario promedio: $" << consulta.datos.precioUnitarioPromedio << endl;
+		}
+		cout << "------------------------------------------------" << endl;
+	} catch (const exception& ex) {
+		cout << "Error al consultar unidades vendidas: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar unidades vendidas." << endl;
 	}
-	cout << "------------------------------------------------" << endl;
 }
 
 void MenuEmpleado::consultarInfoDetalladaProducto() {
-	AdminController* adminCtrl = AdminController::getInstanciaAdmin();
-	if (adminCtrl == nullptr) return;
-
-	auto productos = adminCtrl->listarProductos();
-	if (productos.empty()) {
-		cout << "\nNo hay productos registrados en el catalogo." << endl;
-		return;
-	}
-
-	cout << "\n--- Productos disponibles ---\n";
-	for (Producto* p : productos) {
-		if (p != nullptr) {
-			cout << "  Codigo: " << p->getCodigo()
-				 << " | Nombre: " << p->getNombre() << endl;
+	try {
+		vector<ProductoEmpleadoInfo> productos = ctrl.listarProductosEmpleado();
+		if (productos.empty()) {
+			cout << "\nNo hay productos registrados en el catalogo." << endl;
+			return;
 		}
-	}
 
-	int codigo;
-	cout << "\nIngrese el codigo del producto a consultar (0 para cancelar): ";
-	cin >> codigo;
+		cout << "\n--- Productos disponibles ---\n";
+		for (const ProductoEmpleadoInfo& p : productos) {
+			cout << "  Codigo: " << p.codigo << " | Nombre: " << p.nombre << endl;
+		}
 
-	if (codigo == 0) {
-		cout << "Operacion cancelada." << endl;
-		return;
-	}
+		int codigo;
+		cout << "\nIngrese el codigo del producto a consultar (0 para cancelar): ";
+		cin >> codigo;
+		if (codigo == 0) {
+			cout << "Operacion cancelada." << endl;
+			return;
+		}
 
-	Producto* producto = adminCtrl->buscarProducto(codigo);
-	if (producto == nullptr) {
-		cout << "Error: No existe un producto con el codigo ingresado." << endl;
-		return;
-	}
+		DetalleProductoEmpleadoVista detalle = ctrl.obtenerDetalleProductoEmpleadoVista(codigo);
+		if (!detalle.productoExiste) {
+			cout << "Error: No existe un producto con el codigo ingresado." << endl;
+			return;
+		}
 
-	// Mostrar informacion basica (para todos los roles)
-	cout << "\n========== INFORMACION DETALLADA DEL PRODUCTO ==========\n";
-	cout << "Codigo: " << producto->getCodigo() << endl;
-	cout << "Nombre: " << producto->getNombre() << endl;
-	cout << "Descripcion: " << producto->getDescripcion() << endl;
+		cout << "\n========== INFORMACION DETALLADA DEL PRODUCTO ==========\n";
+		cout << "Codigo: " << detalle.codigo << endl;
+		cout << "Nombre: " << detalle.nombre << endl;
+		cout << "Descripcion: " << detalle.descripcion << endl;
+		cout << "Categoria: " << detalle.categoria << endl;
+		cout << "Precio de venta unitario: $" << detalle.precioVentaUnitario << endl;
+		cout << "Stock actual: " << detalle.stockActual << endl;
+		cout << "Puntaje promedio: " << detalle.puntajePromedio << "/5"
+			 << " (" << detalle.cantidadCalificaciones << " calificaciones)" << endl;
+		cout << "\n--- Datos de administracion ---\n";
+		cout << "Stock minimo: " << detalle.stockMinimo << endl;
 
-	string nombreCat = producto->getCategoria() != nullptr ? producto->getCategoria()->getNombre() : "(sin categoria)";
-	cout << "Categoria: " << nombreCat << endl;
-
-	cout << "Precio de venta unitario: $" << producto->getPrecioVentaActual() << endl;
-	cout << "Stock actual: " << producto->getStock() << endl;
-	cout << "Puntaje promedio: " << producto->getPuntajePromedio() << "/5"
-		 << " (" << producto->getCantidadCalificaciones() << " calificaciones)" << endl;
-
-	// Informacion adicional para Empleado y Administrador
-	cout << "\n--- Datos de administracion ---\n";
-	cout << "Stock minimo: " << producto->getStockMinimo() << endl;
-
-	// Proveedores que abastecen el producto
-	auto asociaciones = adminCtrl->listarAsociacionesDeProducto(codigo);
-	if (asociaciones.empty()) {
-		cout << "Proveedores: Ninguno (el producto no esta asociado a ningun proveedor)" << endl;
-	} else {
-		cout << "\nProveedores que abastecen este producto:" << endl;
-		for (size_t i = 0; i < asociaciones.size(); ++i) {
-			ProveedorProducto* pp = asociaciones[i];
-			if (pp == nullptr) continue;
-			// Obtener datos del proveedor
-			string rutProveedor = "(desconocido)";
-			string empresaProveedor = "(desconocida)";
-			for (Proveedor* pr : adminCtrl->listarProveedores()) {
-				if (pr == nullptr) continue;
-				for (ProveedorProducto* pp2 : pr->getProductosOfrecidos()) {
-					if (pp2 == pp) {
-						rutProveedor = pr->getRut();
-						empresaProveedor = pr->getEmpresa();
-						break;
-					}
-				}
-				if (rutProveedor != "(desconocido)") break;
+		if (detalle.proveedores.empty()) {
+			cout << "Proveedores: Ninguno (el producto no esta asociado a ningun proveedor)" << endl;
+		} else {
+			cout << "\nProveedores que abastecen este producto:" << endl;
+			for (size_t i = 0; i < detalle.proveedores.size(); ++i) {
+				const ProveedorProductoInfo& pp = detalle.proveedores[i];
+				cout << "  " << (i + 1) << ". Proveedor: " << pp.empresaProveedor
+					 << " (RUT: " << pp.rutProveedor << ")" << endl;
+				cout << "     Precio de compra vigente: $" << pp.precioCompraPactado << endl;
+				cout << "     Tiempo de entrega estimado: " << pp.tiempoEntregaDias << " dias" << endl;
 			}
-			cout << "  " << (i + 1) << ". Proveedor: " << empresaProveedor
-				 << " (RUT: " << rutProveedor << ")" << endl;
-			cout << "     Precio de compra vigente: $" << pp->getPrecioCompraPactado() << endl;
-			cout << "     Tiempo de entrega estimado: " << pp->getTiempoEntregaEstimadoEnDias() << " dias" << endl;
 		}
+		cout << "========================================================\n";
+	} catch (const exception& ex) {
+		cout << "Error al consultar detalle de producto: " << ex.what() << endl;
+	} catch (...) {
+		cout << "Error al consultar detalle de producto." << endl;
 	}
-	cout << "========================================================\n";
 }

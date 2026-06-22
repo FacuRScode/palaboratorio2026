@@ -5,6 +5,7 @@
 #include "AdminController.h"
 #include "EmpleadoController.h"
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -12,13 +13,17 @@ using namespace std;
 AdminController* AdminController::instanciaAdmin = nullptr;
 
 // Constructor privado usado por el singleton
-AdminController::AdminController() {}
+AdminController::AdminController() : empleadoCtrlRef(nullptr) {}
 
 AdminController* AdminController::getInstanciaAdmin(){
 	if (instanciaAdmin == nullptr) {
 		instanciaAdmin = new AdminController();
 	}
 	return instanciaAdmin;
+}
+
+void AdminController::setEmpleadoController(EmpleadoController* empleadoController) {
+	empleadoCtrlRef = empleadoController;
 }
 
 AdminController::~AdminController() {
@@ -86,10 +91,14 @@ bool AdminController::productoAsociadoAProveedor(int codigoProducto) const {
 
 bool AdminController::eliminarProducto(int codigo, bool eliminarAsociaciones) {
 	// Verificar que el producto no tenga ventas ni ordenes pendientes
-	EmpleadoController* empCtrl = EmpleadoController::getInstanciaEmpleado();
-	if (empCtrl != nullptr) {
-		if (empCtrl->productoEstaEnVentas(codigo)) return false;
-		if (empCtrl->productoEstaEnOrdenesPendientes(codigo)) return false;
+	if (empleadoCtrlRef == nullptr) {
+		throw logic_error("No se puede eliminar el producto: controlador de empleados no asociado.");
+	}
+	if (empleadoCtrlRef->productoEstaEnVentas(codigo)) {
+		throw logic_error("No se puede eliminar el producto: tiene ventas registradas.");
+	}
+	if (empleadoCtrlRef->productoEstaEnOrdenesPendientes(codigo)) {
+		throw logic_error("No se puede eliminar el producto: participa en ordenes de compra pendientes.");
 	}
 
 	for (auto it = productos.begin(); it != productos.end(); ++it) {
@@ -120,6 +129,63 @@ bool AdminController::eliminarProducto(int codigo, bool eliminarAsociaciones) {
 
 vector<Producto*> AdminController::listarProductos() const {
 	return productos;
+}
+
+vector<Producto*> AdminController::listarProductosPorCategoria(const string& nombreCategoria) const {
+	vector<Producto*> resultado;
+	for (Producto* p : productos) {
+		if (p != nullptr && p->getCategoria() != nullptr && p->getCategoria()->getNombre() == nombreCategoria) {
+			resultado.push_back(p);
+		}
+	}
+	return resultado;
+}
+
+vector<Producto*> AdminController::listarProductosConStockBajo(bool ordenarPorCriticidad) const {
+	vector<Producto*> bajos;
+	for (Producto* p : productos) {
+		if (p != nullptr && p->getStock() < p->getStockMinimo()) {
+			bajos.push_back(p);
+		}
+	}
+	if (ordenarPorCriticidad) {
+		sort(bajos.begin(), bajos.end(), [](Producto* a, Producto* b) {
+			int diffA = a->getStockMinimo() - a->getStock();
+			int diffB = b->getStockMinimo() - b->getStock();
+			return diffA > diffB;
+		});
+	}
+	return bajos;
+}
+
+DetalleProductoAdmin AdminController::obtenerDetalleProductoAdmin(int codigoProducto) const {
+	DetalleProductoAdmin res;
+	res.productoExiste = false;
+	res.producto = nullptr;
+	res.proveedores.clear();
+
+	Producto* producto = buscarProducto(codigoProducto);
+	if (producto == nullptr) return res;
+
+	res.productoExiste = true;
+	res.producto = producto;
+
+	for (Proveedor* pr : proveedores) {
+		if (pr == nullptr) continue;
+		for (ProveedorProducto* pp : pr->getProductosOfrecidos()) {
+			if (pp == nullptr || pp->getProducto() == nullptr) continue;
+			if (pp->getProducto()->getCodigo() != codigoProducto) continue;
+
+			ProveedorProductoInfo info;
+			info.rutProveedor = pr->getRut();
+			info.empresaProveedor = pr->getEmpresa();
+			info.precioCompraPactado = pp->getPrecioCompraPactado();
+			info.tiempoEntregaDias = pp->getTiempoEntregaEstimadoEnDias();
+			res.proveedores.push_back(info);
+		}
+	}
+
+	return res;
 }
 
 // -- Categorías -----------------------------------------------
@@ -176,10 +242,37 @@ bool AdminController::modificarCategoria(const string& nombreActual, const strin
 // -- Empleados -----------------------------------------------
 Empleado* AdminController::crearEmpleado(const string& nombre, const string& correo,
 										 const string& contrasena, const string& rol) {
-	if (buscarEmpleado(correo) != nullptr) return nullptr;
+	if (buscarEmpleado(correo) != nullptr) {
+		throw invalid_argument("Correo invalido: ya existe un empleado registrado con ese correo.");
+	}
+	if (empleadoCtrlRef != nullptr && empleadoCtrlRef->buscarClientePorCorreo(correo) != nullptr) {
+		throw invalid_argument("Correo invalido: ya existe un cliente registrado con ese correo.");
+	}
 	Empleado* e = new Empleado(nombre, correo, contrasena, rol);
 	empleados.push_back(e);
 	return e;
+}
+
+ResultadoAltaEmpleado AdminController::crearEmpleadoConRolOpcion(const string& nombre, const string& correo,
+																 const string& contrasena, int opcionRol) {
+	ResultadoAltaEmpleado res;
+	res.exito = false;
+	res.rolValido = (opcionRol == 1 || opcionRol == 2);
+	bool usadoPorEmpleado = (buscarEmpleado(correo) != nullptr);
+	bool usadoPorCliente = (empleadoCtrlRef != nullptr && empleadoCtrlRef->buscarClientePorCorreo(correo) != nullptr);
+	res.correoDisponible = (!usadoPorEmpleado && !usadoPorCliente);
+	res.rolAsignado = "";
+	if (!res.rolValido) {
+		throw invalid_argument("Rol invalido: debe ser Empleado o Administrador.");
+	}
+	if (!res.correoDisponible) {
+		throw invalid_argument("Correo invalido: ya esta registrado en el sistema.");
+	}
+
+	res.rolAsignado = (opcionRol == 2) ? "Administrador" : "Empleado";
+	Empleado* creado = crearEmpleado(nombre, correo, contrasena, res.rolAsignado);
+	res.exito = (creado != nullptr);
+	return res;
 }
 
 Empleado* AdminController::buscarEmpleado(const string& correo) const {
@@ -292,6 +385,38 @@ bool AdminController::asociarProveedorProducto(const string& rutProveedor, int c
 	ProveedorProducto* pp = new ProveedorProducto(precioCompra, tiempoEntrega, p);
 	pr->addProveedorProducto(pp);
 	return true;
+}
+
+bool AdminController::actualizarAsociacionProveedorProducto(const string& rutProveedor, int codigoProducto,
+															int nuevoPrecioCompra, int nuevoTiempoEntrega) {
+	ProveedorProducto* asociacion = buscarAsociacion(rutProveedor, codigoProducto);
+	if (asociacion == nullptr) return false;
+	asociacion->setPrecioCompraPactado(nuevoPrecioCompra);
+	asociacion->setTiempoEntregaEstimadoEnDias(nuevoTiempoEntrega);
+	return true;
+}
+
+ResultadoGestionProveedorProducto AdminController::gestionarAsociacionProveedorProducto(const string& rutProveedor, int codigoProducto,
+																						int precioCompra, int tiempoEntrega) {
+	ResultadoGestionProveedorProducto res;
+	res.exito = false;
+	res.proveedorExiste = (buscarProveedor(rutProveedor) != nullptr);
+	res.productoExiste = (buscarProducto(codigoProducto) != nullptr);
+	res.actualizada = false;
+	if (!res.proveedorExiste || !res.productoExiste) return res;
+
+	if (existeProveedorProducto(rutProveedor, codigoProducto)) {
+		res.actualizada = true;
+		res.exito = actualizarAsociacionProveedorProducto(rutProveedor, codigoProducto, precioCompra, tiempoEntrega);
+	} else {
+		res.actualizada = false;
+		res.exito = asociarProveedorProducto(rutProveedor, codigoProducto, precioCompra, tiempoEntrega);
+	}
+	return res;
+}
+
+bool AdminController::existeProveedorProducto(const string& rutProveedor, int codigoProducto) const {
+	return buscarAsociacion(rutProveedor, codigoProducto) != nullptr;
 }
 
 vector<ProveedorProducto*> AdminController::listarAsociacionesDeProducto(int codigoProducto) const {

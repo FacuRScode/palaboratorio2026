@@ -7,6 +7,7 @@
 #include "../dominio/Cliente.h"
 #include <ctime>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -76,13 +77,35 @@ vector<Producto*> VentaController::listarProductosComprados(const string& correo
 
 // Calificaciones
 bool VentaController::calificarProducto(int codigoProducto, Puntaje puntaje, const string& comentario, const string& correoCliente) {
-	if (adminCtrl == nullptr || empleadoCtrl == nullptr) return false;
+	if (adminCtrl == nullptr || empleadoCtrl == nullptr) {
+		throw logic_error("No hay controladores disponibles para registrar la calificacion.");
+	}
+	int puntajeNumerico = static_cast<int>(puntaje);
+	if (puntajeNumerico < 1 || puntajeNumerico > 5) {
+		throw invalid_argument("Puntaje invalido: debe estar entre 1 y 5.");
+	}
 
 	Producto* p = adminCtrl->buscarProducto(codigoProducto);
-	if (p == nullptr) return false;
+	if (p == nullptr) {
+		throw invalid_argument("Producto invalido: no existe un producto con ese codigo.");
+	}
 
 	Cliente* cliente = empleadoCtrl->buscarClientePorCorreo(correoCliente);
-	if (cliente == nullptr) return false;
+	if (cliente == nullptr) {
+		throw invalid_argument("Cliente invalido: no existe un cliente registrado con ese correo.");
+	}
+
+	bool productoComprado = false;
+	vector<Producto*> comprados = listarProductosComprados(correoCliente);
+	for (Producto* comprado : comprados) {
+		if (comprado != nullptr && comprado->getCodigo() == codigoProducto) {
+			productoComprado = true;
+			break;
+		}
+	}
+	if (!productoComprado) {
+		throw logic_error("Operacion invalida: solo puede calificar un cliente que haya comprado el producto.");
+	}
 
 	// Usar fecha y hora actual del sistema
 	DTFecha fechaActual = obtenerFechaActual();
@@ -93,13 +116,18 @@ bool VentaController::calificarProducto(int codigoProducto, Puntaje puntaje, con
 	// Asociar la calificación al cliente
 	cliente->addCalificacion(cal);
 
-	// Recalcular el puntaje promedio del producto
-	float promedioActual = p->getPuntajePromedio();
-	int cantidadActual = p->getCantidadCalificaciones();
-	float nuevoPromedio = (promedioActual * cantidadActual + static_cast<int>(puntaje)) / (cantidadActual + 1);
 
+	vector<Calificacion*> historico = listarCalificacionesDeProducto(codigoProducto);
+	int suma = 0;
+	int cantidad = 0;
+	for (Calificacion* c : historico) {
+		if (c == nullptr) continue;
+		suma += static_cast<int>(c->getPuntaje());
+		cantidad++;
+	}
+	float nuevoPromedio = (cantidad > 0) ? (static_cast<float>(suma) / static_cast<float>(cantidad)) : 0.0f;
+	p->setCantidadCalificaciones(cantidad);
 	p->setPuntajePromedio(nuevoPromedio);
-	p->setCantidadCalificaciones(cantidadActual + 1);
 
 	return true;
 }
@@ -132,4 +160,148 @@ vector<Calificacion*> VentaController::listarCalificacionesDeProducto(int codigo
 	});
 
 	return resultado;
+}
+
+vector<ProductoClienteInfo> VentaController::listarProductosCompradosCliente(const string& correoCliente) {
+	vector<ProductoClienteInfo> resultado;
+	vector<Producto*> comprados = listarProductosComprados(correoCliente);
+	for (Producto* p : comprados) {
+		if (p == nullptr) continue;
+		ProductoClienteInfo info;
+		info.codigo = p->getCodigo();
+		info.nombre = p->getNombre();
+		info.descripcion = p->getDescripcion();
+		resultado.push_back(info);
+	}
+	return resultado;
+}
+
+vector<ProductoClienteInfo> VentaController::listarProductosCatalogoCliente() const {
+	vector<ProductoClienteInfo> resultado;
+	if (adminCtrl == nullptr) return resultado;
+	for (Producto* p : adminCtrl->listarProductos()) {
+		if (p == nullptr) continue;
+		ProductoClienteInfo info;
+		info.codigo = p->getCodigo();
+		info.nombre = p->getNombre();
+		info.descripcion = p->getDescripcion();
+		resultado.push_back(info);
+	}
+	return resultado;
+}
+
+ResultadoCalificacionCliente VentaController::registrarCalificacionCliente(const string& correoCliente, int codigoProducto, int puntaje, const string& comentario) {
+	ResultadoCalificacionCliente res;
+	res.exito = false;
+	res.productoExiste = false;
+	res.puntajeValido = (puntaje >= 1 && puntaje <= 5);
+	res.productoComprado = false;
+	res.nombreProducto = "";
+	res.puntajePromedioActualizado = 0;
+
+	if (adminCtrl == nullptr || empleadoCtrl == nullptr) {
+		throw logic_error("No hay controladores disponibles para registrar la calificacion.");
+	}
+	Producto* producto = adminCtrl->buscarProducto(codigoProducto);
+	if (producto == nullptr) {
+		throw invalid_argument("Producto invalido: no existe un producto con ese codigo.");
+	}
+
+	res.productoExiste = true;
+	res.nombreProducto = producto->getNombre();
+	if (!res.puntajeValido) {
+		throw invalid_argument("Puntaje invalido: debe estar entre 1 y 5.");
+	}
+
+	vector<Producto*> comprados = listarProductosComprados(correoCliente);
+	for (Producto* p : comprados) {
+		if (p != nullptr && p->getCodigo() == codigoProducto) {
+			res.productoComprado = true;
+			break;
+		}
+	}
+	if (!res.productoComprado) {
+		throw logic_error("Operacion invalida: solo puede calificar un cliente que haya comprado el producto.");
+	}
+
+	calificarProducto(codigoProducto, static_cast<Puntaje>(puntaje), comentario, correoCliente);
+
+	res.exito = true;
+	res.puntajePromedioActualizado = producto->getPuntajePromedio();
+	return res;
+}
+
+ResultadoDetalleProductoCliente VentaController::obtenerDetalleProductoCliente(int codigoProducto) {
+	ResultadoDetalleProductoCliente res;
+	res.productoExiste = false;
+	res.codigo = codigoProducto;
+	res.nombre = "";
+	res.descripcion = "";
+	res.categoria = "";
+	res.precioVentaUnitario = 0;
+	res.stockActual = 0;
+	res.puntajePromedio = 0;
+	res.cantidadCalificaciones = 0;
+	res.ultimasCalificaciones.clear();
+
+	if (adminCtrl == nullptr) return res;
+	Producto* producto = adminCtrl->buscarProducto(codigoProducto);
+	if (producto == nullptr) return res;
+
+	res.productoExiste = true;
+	res.codigo = producto->getCodigo();
+	res.nombre = producto->getNombre();
+	res.descripcion = producto->getDescripcion();
+	res.categoria = (producto->getCategoria() != nullptr) ? producto->getCategoria()->getNombre() : "(sin categoria)";
+	res.precioVentaUnitario = producto->getPrecioVentaActual();
+	res.stockActual = producto->getStock();
+	res.puntajePromedio = producto->getPuntajePromedio();
+	res.cantidadCalificaciones = producto->getCantidadCalificaciones();
+
+	vector<Calificacion*> calificaciones = listarCalificacionesDeProducto(codigoProducto);
+	int mostrar = min(5, static_cast<int>(calificaciones.size()));
+	for (int i = 0; i < mostrar; ++i) {
+		Calificacion* cal = calificaciones[i];
+		if (cal == nullptr) continue;
+		CalificacionClienteInfo info{
+			cal->getFecha(),
+			static_cast<int>(cal->getPuntaje()),
+			cal->getComentario()
+		};
+		res.ultimasCalificaciones.push_back(info);
+	}
+
+	return res;
+}
+
+ResultadoCalificacionesProductoVista VentaController::obtenerCalificacionesProductoVista(int codigoProducto) {
+	ResultadoCalificacionesProductoVista res;
+	res.productoExiste = false;
+	res.nombreProducto = "";
+	res.puntajePromedio = 0;
+	res.cantidadCalificaciones = 0;
+	res.calificaciones.clear();
+
+	if (adminCtrl == nullptr) return res;
+	Producto* producto = adminCtrl->buscarProducto(codigoProducto);
+	if (producto == nullptr) return res;
+
+	res.productoExiste = true;
+	res.nombreProducto = producto->getNombre();
+	res.puntajePromedio = producto->getPuntajePromedio();
+	res.cantidadCalificaciones = producto->getCantidadCalificaciones();
+
+	vector<Calificacion*> calificaciones = listarCalificacionesDeProducto(codigoProducto);
+	for (Calificacion* cal : calificaciones) {
+		if (cal == nullptr) continue;
+		CalificacionEmpleadoVistaInfo info{
+			cal->getFecha(),
+			static_cast<int>(cal->getPuntaje()),
+			(cal->getClienteCalificador() != nullptr) ? cal->getClienteCalificador()->getRut() : "N/A",
+			cal->getComentario()
+		};
+		res.calificaciones.push_back(info);
+	}
+
+	return res;
 }
