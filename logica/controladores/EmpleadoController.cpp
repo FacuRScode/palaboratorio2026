@@ -686,7 +686,14 @@ ResultadoRegistrarRecepcionOrden EmpleadoController::registrarRecepcionOrdenPend
         }
     }
 
-    res.exito = registrarRecepcionOrden(orden, cantidadesRecibidas, obtenerFechaActual());
+    try {
+        res.exito = registrarRecepcionOrden(orden, cantidadesRecibidas, obtenerFechaActual());
+    } catch (const invalid_argument&) {
+        res.cantidadesValidas = false;
+    } catch (const logic_error&) {
+        // La orden ya no esta pendiente (fue recibida o cancelada)
+        res.idValido = false;
+    }
     return res;
 }
 
