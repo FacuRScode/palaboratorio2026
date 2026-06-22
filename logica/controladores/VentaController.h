@@ -21,10 +21,12 @@ struct ProductoClienteInfo {
 	int codigo;
 	string nombre;
 	string descripcion;
+	float puntajePromedio;
 };
 
 struct CalificacionClienteInfo {
 	DTFecha fecha;
+	DTHora hora;
 	int puntaje;
 	string comentario;
 };
@@ -53,6 +55,7 @@ struct ResultadoDetalleProductoCliente {
 
 struct CalificacionEmpleadoVistaInfo {
 	DTFecha fecha;
+	DTHora hora;
 	int puntaje;
 	string rutCliente;
 	string comentario;

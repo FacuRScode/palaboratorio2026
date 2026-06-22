@@ -13,17 +13,14 @@ bool AuthController::iniciarSesion(const string& correo, const string& contrasen
         return true;
     }
 
-    // 2. Buscar entre clientes registrados
-    // Necesitamos iterar los clientes del EmpleadoController para buscar por correo
-    if (empleadoCtrl != nullptr) {
-        vector<Cliente*> clientes = empleadoCtrl->listarClientes();
-        for (Cliente* c : clientes) {
-            if (c != nullptr && c->getCorreo() == correo && c->getContrasena() == contrasena) {
-                sesionActual = {true, c->getCorreo(), c->getNombre() + " " + c->getApellido(), "Cliente"};
-                return true;
-            }
-        }
-    }
+	// 2. Buscar entre clientes registrados
+	if (empleadoCtrl != nullptr) {
+		Cliente* cliente = empleadoCtrl->buscarClientePorCorreo(correo);
+		if (cliente != nullptr && cliente->getContrasena() == contrasena) {
+			sesionActual = {true, cliente->getCorreo(), cliente->getNombre() + " " + cliente->getApellido(), "Cliente"};
+			return true;
+		}
+	}
 
     // Credenciales inválidas
     return false;

@@ -50,13 +50,13 @@ void MenuPrincipal::mostrarLogin() {
 			} else {
 				cout << "\nError: Correo o contrasena incorrectos." << endl;
 				cout << "1. Reintentar\n";
-				cout << "2. Cancelar (salir)\n";
+				cout << "2. Cancelar\n";
 				int op;
 				cout << "Seleccione una opcion: ";
 				cin >> op;
 				if (op == 2) {
-					cout << "Operacion cancelada. Saliendo del sistema..." << endl;
-					exit(0);
+					cout << "Operacion cancelada." << endl;
+					return; // vuelve al menu principal sin salir del sistema
 				}
 				// Si op == 1, reintenta
 			}
