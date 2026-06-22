@@ -37,8 +37,12 @@ AdminController::~AdminController() {
 Producto* AdminController::crearProducto(int codigo, const string& nombre, const string& descripcion,
 										 float precioVentaActual, int stock, int stockMinimo, const string& nombreCategoria) {
 	if (buscarProducto(codigo) != nullptr) return nullptr; // ya existe
-	Categoria* cat = buscarCategoria(nombreCategoria);
-	if (cat == nullptr) return nullptr; // categoria no existe
+	Categoria* cat = nullptr;
+	if (!nombreCategoria.empty()) {
+		cat = buscarCategoria(nombreCategoria);
+		if (cat == nullptr) return nullptr; // categoria no existe
+	}
+	// Si nombreCategoria esta vacio, el producto se crea sin categoria (cat = nullptr)
 	Producto* p = new Producto(codigo, nombre, descripcion, precioVentaActual, stock, stockMinimo, 0, cat);
 	productos.push_back(p);
 	return p;
@@ -253,8 +257,7 @@ Empleado* AdminController::crearEmpleado(const string& nombre, const string& cor
 	return e;
 }
 
-ResultadoAltaEmpleado AdminController::crearEmpleadoConRolOpcion(const string& nombre, const string& correo,
-																 const string& contrasena, int opcionRol) {
+ResultadoAltaEmpleado AdminController::validarAltaEmpleado(const string& correo, int opcionRol) const {
 	ResultadoAltaEmpleado res;
 	res.exito = false;
 	res.rolValido = (opcionRol == 1 || opcionRol == 2);
@@ -263,13 +266,21 @@ ResultadoAltaEmpleado AdminController::crearEmpleadoConRolOpcion(const string& n
 	res.correoDisponible = (!usadoPorEmpleado && !usadoPorCliente);
 	res.rolAsignado = "";
 	if (!res.rolValido) {
-		throw invalid_argument("Rol invalido: debe ser Empleado o Administrador.");
+		return res;
 	}
 	if (!res.correoDisponible) {
-		throw invalid_argument("Correo invalido: ya esta registrado en el sistema.");
+		return res;
 	}
-
 	res.rolAsignado = (opcionRol == 2) ? "Administrador" : "Empleado";
+	return res;
+}
+
+ResultadoAltaEmpleado AdminController::crearEmpleadoConRolOpcion(const string& nombre, const string& correo,
+																 const string& contrasena, int opcionRol) {
+	ResultadoAltaEmpleado res = validarAltaEmpleado(correo, opcionRol);
+	if (!res.rolValido || !res.correoDisponible) {
+		return res;
+	}
 	Empleado* creado = crearEmpleado(nombre, correo, contrasena, res.rolAsignado);
 	res.exito = (creado != nullptr);
 	return res;

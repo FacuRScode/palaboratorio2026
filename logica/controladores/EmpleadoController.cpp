@@ -802,6 +802,19 @@ DetalleProductoEmpleadoVista EmpleadoController::obtenerDetalleProductoEmpleadoV
     return res;
 }
 
+vector<ProveedorInfoVista> EmpleadoController::listarProveedoresVista() const {
+    vector<ProveedorInfoVista> resultado;
+    if (adminCtrl == nullptr) return resultado;
+    for (Proveedor* proveedor : adminCtrl->listarProveedores()) {
+        if (proveedor == nullptr) continue;
+        ProveedorInfoVista info;
+        info.rut = proveedor->getRut();
+        info.empresa = proveedor->getEmpresa();
+        resultado.push_back(info);
+    }
+    return resultado;
+}
+
 string EmpleadoController::obtenerNombreClientePorRut(const string& rutCliente) const {
     Cliente* cliente = buscarCliente(rutCliente);
     if (cliente == nullptr) return "";

@@ -141,6 +141,11 @@ struct ResultadoRegistrarRecepcionOrden {
     bool cantidadesValidas;
 };
 
+struct ProveedorInfoVista {
+    string rut;
+    string empresa;
+};
+
 struct CategoriaEmpleadoInfo {
     string nombre;
     string descripcion;
@@ -234,6 +239,7 @@ public:
     vector<Producto*> listarStockProductos(const string& categoria = "") const;
     vector<Producto*> listarProductosConStockBajo(bool ordenarPorCriticidad) const;
     DetalleProductoAdmin obtenerDetalleProductoEmpleado(int codigoProducto) const;
+    vector<ProveedorInfoVista> listarProveedoresVista() const;
     vector<CategoriaEmpleadoInfo> listarCategoriasEmpleado() const;
     vector<ProductoEmpleadoInfo> listarProductosEmpleado() const;
     vector<StockProductoEmpleadoInfo> listarStockProductosVista(const string& categoria = "") const;

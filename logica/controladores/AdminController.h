@@ -88,6 +88,7 @@ public:
 							 const string& contrasena, const string& rol);
 	ResultadoAltaEmpleado crearEmpleadoConRolOpcion(const string& nombre, const string& correo,
 													const string& contrasena, int opcionRol);
+	ResultadoAltaEmpleado validarAltaEmpleado(const string& correo, int opcionRol) const;
 	Empleado* buscarEmpleado(const string& correo) const;
 	bool eliminarEmpleado(const string& correo);
 	vector<Empleado*> listarEmpleados() const;

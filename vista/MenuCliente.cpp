@@ -23,9 +23,16 @@ void MenuCliente::mostrar() {
 			cout << "Seleccione una opcion: ";
 			cin >> op;
 			if (op == 0) {
-				if (authCtrl) authCtrl->cerrarSesion();
-				cout << "Sesion cerrada." << endl;
-				return;
+				char confirmar;
+				cout << "¿Esta seguro de cerrar la sesion? (s/n): ";
+				cin >> confirmar;
+				if (confirmar == 's' || confirmar == 'S') {
+					if (authCtrl) authCtrl->cerrarSesion();
+					cout << "Sesion cerrada. Redirigiendo a la pantalla de inicio de sesion..." << endl;
+					return;
+				}
+				cout << "Operacion cancelada. Sesion activa." << endl;
+				continue;
 			}
 			if (op == 1) {
 				calificarProducto();
@@ -72,8 +79,18 @@ void MenuCliente::calificarProducto() {
 		string comentario;
 		cout << "\nSeleccione el codigo del producto a calificar: ";
 		cin >> codigo;
-		cout << "Ingrese puntaje (1-5): ";
-		cin >> puntaje;
+
+		// Validar puntaje en la vista antes de enviar al controlador
+		while (true) {
+			cout << "Ingrese puntaje (1-5): ";
+			if (cin >> puntaje && puntaje >= 1 && puntaje <= 5) {
+				break;
+			}
+			cout << "Puntaje invalido. Debe ser un numero entre 1 y 5." << endl;
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		}
+
 		cout << "Ingrese comentario (opcional, presione Enter para omitir): ";
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		getline(cin, comentario);
