@@ -3,15 +3,15 @@
 
 DTFecha::DTFecha(int dia, int mes, int anio) : dia(dia), mes(mes), anio(anio) {}
 
-int DTFecha::getDia() {
+int DTFecha::getDia() const {
 	return this->dia;
 }
 
-int DTFecha::getMes() {
+int DTFecha::getMes() const {
 	return this->mes;
 }
 
-int DTFecha::getAnio() {
+int DTFecha::getAnio() const {
 	return this->anio;
 }
 

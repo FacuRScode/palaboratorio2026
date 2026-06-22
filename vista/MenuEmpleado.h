@@ -12,6 +12,13 @@ private:
 	AuthController* authCtrl;
 	VentaController* ventaCtrl;
 
+	void registrarCliente();
+	void modificarCliente();
+	void registrarVenta();
+	void historialComprasCliente();
+	void emitirOrdenCompra();
+	void cancelarOrdenCompra();
+	void registrarRecepcionOrdenCompra();
 	void consultarCalificacionesProducto();
 	void consultarStockProductos();
 	void consultarProductosStockBajo();

@@ -7,9 +7,9 @@ class DTHora{
     public:
     DTHora(int hora, int minuto, int segundo);
 
-    int getHora();
-    int getMinuto();
-    int getSegundo();
+    int getHora() const;
+    int getMinuto() const;
+    int getSegundo() const;
 
     void setHora(int hora);
     void setMinuto(int minuto);

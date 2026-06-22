@@ -3,15 +3,15 @@
 
 DTHora::DTHora(int hora, int minuto, int segundo) : hora(hora), minuto(minuto), segundo(segundo) {}
 
-int DTHora::getHora() {
+int DTHora::getHora() const {
 	return this->hora;
 }
 
-int DTHora::getMinuto() {
+int DTHora::getMinuto() const {
 	return this->minuto;
 }
 
-int DTHora::getSegundo() {
+int DTHora::getSegundo() const {
 	return this->segundo;
 }
 

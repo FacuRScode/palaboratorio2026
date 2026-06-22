@@ -1,7 +1,11 @@
 #include "Producto.h"
+#include <stdexcept>
 
 using namespace std;
 Producto::Producto(int codigo, string nombre, string descripcion, float precioVentaActual, int stock, int stockMinimo, float puntajePromedio, Categoria* categoria) {
+    if (stock < 0) {
+        throw std::invalid_argument("Stock invalido: no puede ser negativo.");
+    }
     this->codigo = codigo;
     this->nombre = nombre;
     this->descripcion = descripcion;
@@ -52,6 +56,9 @@ void Producto::setPrecioVentaActual(float precioVentaActual) {
     this->precioVentaActual = precioVentaActual;
 }
 void Producto::setStock(int stock) {
+    if (stock < 0) {
+        throw std::invalid_argument("Stock invalido: no puede ser negativo.");
+    }
     this->stock = stock;
 }
 void Producto::setStockMinimo(int stockMinimo) {
