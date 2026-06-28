@@ -74,6 +74,21 @@ void MenuAdministrador::consultarMontoFacturadoCliente() {
 			return;
 		}
 
+		// Listar clientes disponibles
+		auto clientes = empleadoCtrl->listarClientes();
+		if (clientes.empty()) {
+			std::cout << "\nNo hay clientes registrados en el sistema." << std::endl;
+			return;
+		}
+		std::cout << "\n--- Clientes registrados ---\n";
+		for (size_t i = 0; i < clientes.size(); ++i) {
+			if (clientes[i] != nullptr) {
+				std::cout << "  " << (i + 1) << ". RUT: " << clientes[i]->getRut()
+						 << " | Nombre: " << clientes[i]->getNombre() << " " << clientes[i]->getApellido() << std::endl;
+			}
+		}
+		std::cout << "----------------------------\n";
+
 		std::string rut;
 		std::cout << "\nIngrese el RUT del cliente (0 para cancelar): ";
 		std::cin >> rut;
@@ -515,8 +530,22 @@ void MenuAdministrador::menuProductos() {
 					if (p) std::cout << "- codigo=" << p->getCodigo() << " nombre=" << p->getNombre() << " precio=" << p->getPrecioVentaActual() << " stock=" << p->getStock() << '\n';
 				}
 			} else if (op == 3) {
+				// Listar productos disponibles
+				auto todosProductos = ctrl.listarProductos();
+				if (todosProductos.empty()) {
+					std::cout << "\nNo hay productos registrados en el catalogo.\n";
+					break;
+				}
+				std::cout << "\n--- Productos del catalogo ---\n";
+				for (Producto* p : todosProductos) {
+					if (p != nullptr) {
+						std::cout << "  Codigo: " << p->getCodigo()
+								 << " | Nombre: " << p->getNombre() << std::endl;
+					}
+				}
+				std::cout << "------------------------------\n";
 				int codigo;
-				std::cout << "Codigo: "; std::cin >> codigo;
+				std::cout << "Ingrese el codigo del producto a buscar: "; std::cin >> codigo;
 				Producto* p = ctrl.buscarProducto(codigo);
 				if (p) std::cout << "Encontrado: " << p->getNombre() << " (codigo=" << p->getCodigo() << ")\n";
 				else std::cout << "Producto no encontrado." << std::endl;
@@ -1030,17 +1059,77 @@ void MenuAdministrador::menuCategorias() {
 					if (c) std::cout << "- " << c->getNombre() << ": " << c->getDescripcion() << '\n';
 				}
 			} else if (op == 3) {
+				// Listar categorias existentes
+				auto categoriasExistentes = ctrl.listarCategorias();
+				if (categoriasExistentes.empty()) {
+					std::cout << "\nNo hay categorias registradas en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Categorias existentes ---\n";
+				for (size_t i = 0; i < categoriasExistentes.size(); ++i) {
+					if (categoriasExistentes[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". " << categoriasExistentes[i]->getNombre()
+								 << ": " << categoriasExistentes[i]->getDescripcion() << std::endl;
+					}
+				}
+				std::cout << "------------------------------\n";
 				std::string nombre;
-				std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
+				std::cout << "Ingrese el nombre de la categoria a buscar: ";
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
 				auto c = ctrl.buscarCategoria(nombre);
 				if (c) std::cout << "Encontrada: " << c->getNombre() << " - " << c->getDescripcion() << '\n';
 				else std::cout << "Categoria no encontrada." << std::endl;
 			} else if (op == 4) {
+				// Listar categorias existentes
+				auto categoriasExistentes = ctrl.listarCategorias();
+				if (categoriasExistentes.empty()) {
+					std::cout << "\nNo hay categorias registradas en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Categorias existentes ---\n";
+				for (size_t i = 0; i < categoriasExistentes.size(); ++i) {
+					if (categoriasExistentes[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". " << categoriasExistentes[i]->getNombre()
+								 << ": " << categoriasExistentes[i]->getDescripcion() << std::endl;
+					}
+				}
+				std::cout << "------------------------------\n";
 				std::string nombre;
-				std::cout << "Nombre: "; std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
+				std::cout << "Ingrese el nombre de la categoria a eliminar: ";
+				std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); std::getline(std::cin, nombre);
 				bool ok = ctrl.eliminarCategoria(nombre);
 				std::cout << (ok ? "Categoria eliminada." : "No se pudo eliminar.") << std::endl;
 			} else if (op == 5) {
+				// Listar productos disponibles
+				auto todosProductos = ctrl.listarProductos();
+				if (todosProductos.empty()) {
+					std::cout << "\nNo hay productos registrados en el catalogo.\n";
+					break;
+				}
+				std::cout << "\n--- Productos disponibles ---\n";
+				for (Producto* p : todosProductos) {
+					if (p != nullptr) {
+						std::cout << "  Codigo: " << p->getCodigo()
+								 << " | Nombre: " << p->getNombre() << std::endl;
+					}
+				}
+				std::cout << "-----------------------------\n";
+
+				// Listar categorias existentes
+				auto categoriasExistentes = ctrl.listarCategorias();
+				if (categoriasExistentes.empty()) {
+					std::cout << "\nNo hay categorias registradas en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Categorias existentes ---\n";
+				for (size_t i = 0; i < categoriasExistentes.size(); ++i) {
+					if (categoriasExistentes[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". " << categoriasExistentes[i]->getNombre()
+								 << ": " << categoriasExistentes[i]->getDescripcion() << std::endl;
+					}
+				}
+				std::cout << "------------------------------\n";
+
 				int codigo;
 				std::string nombreCategoria;
 				std::cout << "Codigo producto: "; std::cin >> codigo;
@@ -1258,14 +1347,42 @@ void MenuAdministrador::menuEmpleados() {
 					if (e) std::cout << "- " << e->getNombre() << " (" << e->getCorreo() << ") - rol=" << e->getRol() << '\n';
 				}
 			} else if (op == 3) {
+				// Listar empleados existentes
+				auto listaEmpleados = ctrl.listarEmpleados();
+				if (listaEmpleados.empty()) {
+					std::cout << "\nNo hay empleados registrados en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Empleados registrados ---\n";
+				for (size_t i = 0; i < listaEmpleados.size(); ++i) {
+					if (listaEmpleados[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". " << listaEmpleados[i]->getNombre()
+								 << " (" << listaEmpleados[i]->getCorreo() << ") - rol=" << listaEmpleados[i]->getRol() << '\n';
+					}
+				}
+				std::cout << "-----------------------------\n";
 				std::string correo;
-				std::cout << "Correo: "; std::cin >> correo;
+				std::cout << "Ingrese el correo del empleado a buscar: "; std::cin >> correo;
 				auto e = ctrl.buscarEmpleado(correo);
 				if (e) std::cout << "Encontrado: " << e->getNombre() << " - " << e->getCorreo() << '\n';
 				else std::cout << "Empleado no encontrado." << std::endl;
 			} else if (op == 4) {
+				// Listar empleados existentes
+				auto listaEmpleados = ctrl.listarEmpleados();
+				if (listaEmpleados.empty()) {
+					std::cout << "\nNo hay empleados registrados en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Empleados registrados ---\n";
+				for (size_t i = 0; i < listaEmpleados.size(); ++i) {
+					if (listaEmpleados[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". " << listaEmpleados[i]->getNombre()
+								 << " (" << listaEmpleados[i]->getCorreo() << ") - rol=" << listaEmpleados[i]->getRol() << '\n';
+					}
+				}
+				std::cout << "-----------------------------\n";
 				std::string correo;
-				std::cout << "Correo: "; std::cin >> correo;
+				std::cout << "Ingrese el correo del empleado a eliminar: "; std::cin >> correo;
 				bool ok = ctrl.eliminarEmpleado(correo);
 				std::cout << (ok ? "Empleado eliminado." : "No se pudo eliminar.") << std::endl;
 			} else {
@@ -1361,14 +1478,42 @@ void MenuAdministrador::menuProveedores() {
 					if (p) std::cout << "- " << p->getRut() << " - " << p->getEmpresa() << " contacto=" << p->getContactoComercial() << '\n';
 				}
 			} else if (op == 3) {
+				// Listar proveedores existentes
+				auto todosProveedores = ctrl.listarProveedores();
+				if (todosProveedores.empty()) {
+					std::cout << "\nNo hay proveedores registrados en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Proveedores registrados ---\n";
+				for (size_t i = 0; i < todosProveedores.size(); ++i) {
+					if (todosProveedores[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". RUT: " << todosProveedores[i]->getRut()
+								 << " | Empresa: " << todosProveedores[i]->getEmpresa() << std::endl;
+					}
+				}
+				std::cout << "-------------------------------\n";
 				std::string rut;
-				std::cout << "RUT: "; std::cin >> rut;
+				std::cout << "Ingrese el RUT del proveedor a buscar: "; std::cin >> rut;
 				auto p = ctrl.buscarProveedor(rut);
 				if (p) std::cout << "Encontrado: " << p->getEmpresa() << " (" << p->getRut() << ")\n";
 				else std::cout << "Proveedor no encontrado." << std::endl;
 			} else if (op == 4) {
+				// Listar proveedores existentes
+				auto todosProveedores = ctrl.listarProveedores();
+				if (todosProveedores.empty()) {
+					std::cout << "\nNo hay proveedores registrados en el sistema.\n";
+					break;
+				}
+				std::cout << "\n--- Proveedores registrados ---\n";
+				for (size_t i = 0; i < todosProveedores.size(); ++i) {
+					if (todosProveedores[i] != nullptr) {
+						std::cout << "  " << (i + 1) << ". RUT: " << todosProveedores[i]->getRut()
+								 << " | Empresa: " << todosProveedores[i]->getEmpresa() << std::endl;
+					}
+				}
+				std::cout << "-------------------------------\n";
 				std::string rut;
-				std::cout << "RUT: "; std::cin >> rut;
+				std::cout << "Ingrese el RUT del proveedor a eliminar: "; std::cin >> rut;
 				bool ok = ctrl.eliminarProveedor(rut);
 				std::cout << (ok ? "Proveedor eliminado." : "No se pudo eliminar.") << std::endl;
 			} else if (op == 5) {

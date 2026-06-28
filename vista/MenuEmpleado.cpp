@@ -153,6 +153,21 @@ void MenuEmpleado::registrarCliente() {
 
 void MenuEmpleado::modificarCliente() {
 	try {
+		// Listar clientes disponibles
+		auto clientes = ctrl.listarClientes();
+		if (clientes.empty()) {
+			cout << "\nNo hay clientes registrados en el sistema." << endl;
+			return;
+		}
+		cout << "\n--- Clientes registrados ---\n";
+		for (size_t i = 0; i < clientes.size(); ++i) {
+			if (clientes[i] != nullptr) {
+				cout << "  " << (i + 1) << ". RUT: " << clientes[i]->getRut()
+					 << " | Nombre: " << clientes[i]->getNombre() << " " << clientes[i]->getApellido() << endl;
+			}
+		}
+		cout << "----------------------------\n";
+
 		string rut, nuevoNombre, nuevoApellido, nuevaDireccion, nuevoCorreo;
 
 		cout << "RUT del cliente a modificar: "; cin >> rut;
@@ -240,6 +255,21 @@ void MenuEmpleado::registrarVenta() {
 		bool clienteRegistrado = (esRegistrado == 's' || esRegistrado == 'S');
 		string rutCliente;
 		if (clienteRegistrado) {
+			// Listar clientes disponibles
+			auto clientes = ctrl.listarClientes();
+			if (clientes.empty()) {
+				cout << "\nNo hay clientes registrados en el sistema." << endl;
+				return;
+			}
+			cout << "\n--- Clientes registrados ---\n";
+			for (size_t i = 0; i < clientes.size(); ++i) {
+				if (clientes[i] != nullptr) {
+					cout << "  " << (i + 1) << ". RUT: " << clientes[i]->getRut()
+						 << " | Nombre: " << clientes[i]->getNombre() << " " << clientes[i]->getApellido() << endl;
+				}
+			}
+			cout << "----------------------------\n";
+
 			cout << "RUT del cliente: ";
 			cin >> rutCliente;
 
@@ -249,6 +279,18 @@ void MenuEmpleado::registrarVenta() {
 				return;
 			}
 		}
+
+		// Listar productos disponibles del catalogo
+		vector<ProductoEmpleadoInfo> productosDisponibles = ctrl.listarProductosEmpleado();
+		if (productosDisponibles.empty()) {
+			cout << "\nNo hay productos registrados en el catalogo. No se puede registrar la venta." << endl;
+			return;
+		}
+		cout << "\n--- Productos disponibles ---\n";
+		for (const ProductoEmpleadoInfo& prod : productosDisponibles) {
+			cout << "  Codigo: " << prod.codigo << " | Nombre: " << prod.nombre << endl;
+		}
+		cout << "-----------------------------\n";
 
 		struct LineaTemp {
 			int codigoProducto;
@@ -355,6 +397,21 @@ void MenuEmpleado::registrarVenta() {
 
 void MenuEmpleado::historialComprasCliente() {
 	try {
+		// Listar clientes disponibles
+		auto clientes = ctrl.listarClientes();
+		if (clientes.empty()) {
+			cout << "\nNo hay clientes registrados en el sistema." << endl;
+			return;
+		}
+		cout << "\n--- Clientes registrados ---\n";
+		for (size_t i = 0; i < clientes.size(); ++i) {
+			if (clientes[i] != nullptr) {
+				cout << "  " << (i + 1) << ". RUT: " << clientes[i]->getRut()
+					 << " | Nombre: " << clientes[i]->getNombre() << " " << clientes[i]->getApellido() << endl;
+			}
+		}
+		cout << "----------------------------\n";
+
 		string rut;
 		cout << "RUT: ";
 		cin >> rut;
@@ -840,6 +897,21 @@ void MenuEmpleado::consultarCalificacionesProducto() {
 
 void MenuEmpleado::consultarMontoFacturadoCliente() {
 	try {
+		// Listar clientes disponibles
+		auto clientes = ctrl.listarClientes();
+		if (clientes.empty()) {
+			cout << "\nNo hay clientes registrados en el sistema." << endl;
+			return;
+		}
+		cout << "\n--- Clientes registrados ---\n";
+		for (size_t i = 0; i < clientes.size(); ++i) {
+			if (clientes[i] != nullptr) {
+				cout << "  " << (i + 1) << ". RUT: " << clientes[i]->getRut()
+					 << " | Nombre: " << clientes[i]->getNombre() << " " << clientes[i]->getApellido() << endl;
+			}
+		}
+		cout << "----------------------------\n";
+
 		string rut;
 		cout << "\nIngrese el RUT del cliente (0 para cancelar): ";
 		cin >> rut;
